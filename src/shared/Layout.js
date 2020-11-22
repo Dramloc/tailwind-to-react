@@ -19,7 +19,7 @@ const ColorModeSwitch = () => {
       checked={isEnabled}
       onChange={toggleColorMode}
       className={clsx(
-        "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:shadow-solid text-gray-300 dark:text-gray-500",
+        "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-300 dark:focus:ring-gray-700 focus:ring-offset-white dark:focus:ring-offset-gray-900 text-gray-300 dark:text-gray-500",
         {
           "bg-primary-600 dark:bg-primary-500": isEnabled,
           "bg-gray-200 dark:bg-gray-800": !isEnabled,
