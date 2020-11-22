@@ -16,20 +16,16 @@ import { useDebounce } from "./shared/useDebounce";
 const convertComponentWorker = ConvertComponentWorker();
 const prettierWorker = PrettierWorker();
 
+/** @type {(html: string) => import("react-query").PaginatedQueryResult<string>} */
 const useConvertComponentQuery = (html) => {
-  return usePaginatedQuery(["convert", html], async () => {
-    return convertComponentWorker.convert(html);
-  });
+  return usePaginatedQuery(["convert", html], async () => convertComponentWorker.convert(html));
 };
 
+/** @type {(source: string) => import("react-query").PaginatedQueryResult<string>} */
 const usePrettierQuery = (source) => {
-  return usePaginatedQuery(
-    ["prettier", source],
-    async () => prettierWorker.format(`${generateImports(source)}\n\nexport ${source}`),
-    {
-      enabled: source,
-    }
-  );
+  return usePaginatedQuery(["prettier", source], async () => prettierWorker.format(source), {
+    enabled: source,
+  });
 };
 
 const App = () => {
@@ -37,7 +33,11 @@ const App = () => {
   const debouncedInput = useDebounce(input, 500);
 
   const { resolvedData: convertedComponent } = useConvertComponentQuery(debouncedInput);
-  const { resolvedData: prettifiedComponent } = usePrettierQuery(convertedComponent);
+  const { resolvedData: prettifiedComponent } = usePrettierQuery(
+    convertedComponent
+      ? `${generateImports(convertedComponent, { type: "esm" })}\n\nexport ${convertedComponent}`
+      : null
+  );
   const [selectedTab, setSelectedTab] = useState("input");
 
   return (
