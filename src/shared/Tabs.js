@@ -12,7 +12,7 @@ import clsx from "clsx";
 export const Tabs = (props) => {
   return (
     <ReachTabs
-      className="flex flex-col bg-white dark:bg-gray-900 sm:border-r border-gray-200 dark:border-gray-800"
+      className="flex flex-col bg-white dark:bg-gray-900 md:border-r border-gray-200 dark:border-gray-800"
       {...props}
     />
   );
@@ -22,7 +22,7 @@ export const Tabs = (props) => {
 export const TabList = (props) => {
   return (
     <ReachTabList
-      className="flex items-center bg-transparent space-x-5 -mt-px flex-none px-4 sm:px-6"
+      className="flex items-center bg-transparent space-x-5 -mt-px flex-none px-5 sm:px-6"
       {...props}
     />
   );

@@ -12,6 +12,7 @@ import { ColorModeProvider } from "./shared/ColorModeProvider";
 import { Layout } from "./shared/Layout";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
+import { useMedia } from "./shared/useMedia";
 
 const convertComponentWorker = ConvertComponentWorker();
 const prettierWorker = PrettierWorker();
@@ -39,15 +40,18 @@ const App = () => {
       : null
   );
 
+  const isMd = useMedia(["(min-width: 768px)"], [true], false);
+
   return (
     <>
       <ColorModeProvider>
         <Layout>
-          <main className="flex-1 grid grid-cols-1 sm:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
+          <main className="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
             <Tabs>
               <TabList>
                 <Tab>Input</Tab>
                 <Tab>Output</Tab>
+                {!isMd && <Tab>Preview</Tab>}
               </TabList>
               <TabPanels>
                 <TabPanel>
@@ -62,9 +66,14 @@ const App = () => {
                     />
                   )}
                 </TabPanel>
+                {!isMd && (
+                  <TabPanel>
+                    <Preview code={convertedComponent} />
+                  </TabPanel>
+                )}
               </TabPanels>
             </Tabs>
-            <Preview code={convertedComponent} />
+            {isMd && <Preview code={convertedComponent} />}
           </main>
         </Layout>
       </ColorModeProvider>
