@@ -1,11 +1,12 @@
 // @ts-check
+import * as t from "@babel/types";
 import { isJSXAttributeWithName } from "./utils";
 
 /**
  * `<div x-description="comment"` -> `{/* comment *\/} <div`
- * @type {(babel: globalThis.babel) => babel.PluginObj}
+ * @type {() => import("@babel/core").PluginObj}
  */
-export const xDescription = ({ types: t }) => ({
+export const xDescription = () => ({
   visitor: {
     JSXElement(path) {
       const xDescriptionAttribute = path.node.openingElement.attributes.find(

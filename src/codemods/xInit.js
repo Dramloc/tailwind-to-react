@@ -1,10 +1,13 @@
+import { parse } from "@babel/parser";
+import * as t from "@babel/types";
+
 const warn = (message) => console.warn(`[x-init] ${message}`);
 
 /**
  * `x-init="$el.focus()"` -> `const initRef = useRef(); useEffect(() => if (initRef.current) { initRef.current.focus(); }, []); ... ref={initRef}`
- * @type {(babel: globalThis.babel) => babel.PluginObj}
+ * @type {() => import("@babel/core").PluginObj}
  */
-export const xInit = ({ types: t, parse }) => ({
+export const xInit = () => ({
   visitor: {
     JSXAttribute(path) {
       if (path.node.name.name === "x-init") {

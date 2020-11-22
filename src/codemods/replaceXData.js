@@ -1,11 +1,10 @@
+import * as t from "@babel/types";
 import { upperFirst } from "../shared/upperFirst";
 
 const warn = (caller, message) => console.warn(`${caller}[replace-x-data] ${message}`);
 
-/**
- * @type {(babel: globalThis.babel) => babel.Visitor}
- */
-export const replaceXDataIdentifier = ({ types: t }) => ({
+/** @type {import("@babel/core").Visitor} */
+export const replaceXDataIdentifier = {
   MemberExpression(path, { mappings }) {
     if (t.isThisExpression(path.node.object)) {
       const _state = mappings[path.node.property.name];
@@ -20,12 +19,10 @@ export const replaceXDataIdentifier = ({ types: t }) => ({
       path.replaceWith(_state);
     }
   },
-});
+};
 
-/**
- * @type {(babel: globalThis.babel) => babel.Visitor}
- */
-export const replaceXDataAssignment = ({ types: t }) => ({
+/** @type {import("@babel/core").Visitor} */
+export const replaceXDataAssignment = {
   AssignmentExpression(path, { caller, mappings }) {
     if (t.isIdentifier(path.node.left)) {
       // Apply replacements in expression like `open = true`
@@ -53,4 +50,4 @@ export const replaceXDataAssignment = ({ types: t }) => ({
       return;
     }
   },
-});
+};

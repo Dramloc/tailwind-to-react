@@ -8,7 +8,7 @@ import { xData } from "./xData";
 import { xDescription } from "./xDescription";
 import { xInit } from "./xInit";
 
-/** @type {(component: { name: string, html: string }) => Promise<babel.BabelFileResult>} */
+/** @type {(component: { name: string, html: string }) => Promise<import("@babel/core").BabelFileResult>} */
 export const convertComponent = ({ name, html }) => {
   const jsx = new HTMLtoJSX({
     createClass: false,

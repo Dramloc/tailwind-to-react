@@ -1,5 +1,6 @@
 // @ts-check
 import { parseExpression } from "@babel/parser";
+import * as t from "@babel/types";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
@@ -32,10 +33,9 @@ const warn = (message) => console.warn(`[x-data] ${message}`);
  *   );
  * }
  * ```
- * @type {(babel: globalThis.babel) => babel.PluginObj}
+ * @type {() => import("@babel/core").PluginObj}
  */
-export const xData = (babel) => {
-  const { types: t } = babel;
+export const xData = () => {
   return {
     visitor: {
       JSXAttribute(path, { mappings = {} }) {
@@ -126,11 +126,11 @@ export const xData = (babel) => {
 
           // For all declared callbacks, replace assignments and identifiers
           callbacks.forEach((callback) => {
-            callback.traverse(replaceXDataAssignment(babel), {
+            callback.traverse(replaceXDataAssignment, {
               caller: "[x-data]",
               mappings,
             });
-            callback.traverse(replaceXDataIdentifier(babel), {
+            callback.traverse(replaceXDataIdentifier, {
               caller: "[x-data]",
               mappings,
             });
@@ -140,11 +140,11 @@ export const xData = (babel) => {
           const jsxElement = path.parentPath.parentPath;
           jsxElement.assertJSXElement();
 
-          jsxElement.traverse(xOn(babel), { caller: "[x-on]", mappings });
-          jsxElement.traverse(xShow(babel), { caller: "[x-show]", mappings });
-          jsxElement.traverse(xTransition(babel), { caller: "[x-transition]", mappings });
-          jsxElement.traverse(xBind(babel), { caller: "[x-bind]", mappings });
-          jsxElement.traverse(xText(babel), { caller: "[x-text]", mappings });
+          jsxElement.traverse(xOn, { caller: "[x-on]", mappings });
+          jsxElement.traverse(xShow, { caller: "[x-show]", mappings });
+          jsxElement.traverse(xTransition, { caller: "[x-transition]", mappings });
+          jsxElement.traverse(xBind, { caller: "[x-bind]", mappings });
+          jsxElement.traverse(xText, { caller: "[x-text]", mappings });
         }
       },
     },
