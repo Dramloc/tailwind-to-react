@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { usePaginatedQuery } from "react-query";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import ConvertComponentWorker from "workerize-loader!./ConvertComponentWorker";
@@ -11,6 +11,7 @@ import { example } from "./example.js";
 import Preview from "./Preview";
 import { ColorModeProvider } from "./shared/ColorModeProvider";
 import { Layout } from "./shared/Layout";
+import { useDebounce } from "./shared/useDebounce";
 
 const convertComponentWorker = ConvertComponentWorker();
 const prettierWorker = PrettierWorker();
@@ -29,22 +30,6 @@ const usePrettierQuery = (source) => {
       enabled: source,
     }
   );
-};
-
-const useDebounce = (value, delay) => {
-  const [debouncedValue, setDebouncedValue] = useState(value);
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedValue(value);
-    }, delay);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [value, delay]);
-
-  return debouncedValue;
 };
 
 const App = () => {
