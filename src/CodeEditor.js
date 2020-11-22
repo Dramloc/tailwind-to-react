@@ -1,29 +1,40 @@
+// @ts-check
 import Editor from "@monaco-editor/react";
+import clsx from "clsx";
 import { useColorMode } from "./shared/ColorModeProvider";
 import { Spinner } from "./shared/Spinner";
 
-export const CodeEditor = ({ value, onChange = () => {}, language, options, className }) => {
+const noop = () => {};
+
+/**
+ * Controlled code editor component based on the Monaco editor.
+ * @type {React.FC<import("@monaco-editor/react").EditorProps & { onChange?: (value: string) => void }>}
+ */
+export const CodeEditor = ({ onChange = noop, options, className, ...props }) => {
   const { colorMode } = useColorMode();
-  const onEditorDidMount = (_, editor) => {
+
+  /** @type {import("@monaco-editor/react").EditorDidMount} */
+  const onEditorDidMount = (getEditorValue, editor) => {
     editor.onDidChangeModelContent(() => {
-      onChange(editor.getValue());
+      onChange(getEditorValue());
     });
   };
+
   return (
-    <Editor
-      className={className}
-      loading={<Spinner>Loading editor</Spinner>}
-      language={language}
-      value={value}
-      editorDidMount={onEditorDidMount}
-      theme={colorMode}
-      options={{
-        fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-        fontSize: 14,
-        lineHeight: 21,
-        minimap: { enabled: false },
-        ...options,
-      }}
-    />
+    <div className={clsx("h-full w-full", className)}>
+      <Editor
+        editorDidMount={onEditorDidMount}
+        loading={<Spinner>Loading editor</Spinner>}
+        theme={colorMode}
+        options={{
+          fontFamily: 'Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+          fontSize: 14,
+          lineHeight: 21,
+          minimap: { enabled: false },
+          ...options,
+        }}
+        {...props}
+      />
+    </div>
   );
 };

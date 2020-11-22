@@ -79,25 +79,21 @@ const App = () => {
                   </button>
                 </div>
               </div>
-              <div
-                className={clsx("flex-1 border-t border-gray-200 dark:border-gray-800", {
-                  hidden: selectedTab !== "input",
-                })}
-              >
-                <CodeEditor value={input} onChange={setInput} language="html" />
+              <div className="flex-1 border-t border-gray-200 dark:border-gray-800">
+                <CodeEditor
+                  value={input}
+                  onChange={setInput}
+                  language="html"
+                  className={clsx({ hidden: selectedTab !== "input" })}
+                />
               </div>
               {prettifiedComponent && (
-                <div
-                  className={clsx("flex-1 border-t border-gray-200 dark:border-gray-800", {
-                    hidden: selectedTab !== "output",
-                  })}
-                >
-                  <CodeEditor
-                    value={prettifiedComponent}
-                    options={{ readOnly: true }}
-                    language="javascript"
-                  />
-                </div>
+                <CodeEditor
+                  value={prettifiedComponent}
+                  options={{ readOnly: true }}
+                  language="javascript"
+                  className={clsx({ hidden: selectedTab !== "output" })}
+                />
               )}
             </div>
             <div className="relative col-span-1 order-last sm:order-1 row-span-2">
