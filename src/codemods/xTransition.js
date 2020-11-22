@@ -81,11 +81,7 @@ export const xTransition = (babel) => {
           const attributeName = attributeMapping[attribute.name.name.name];
           attribute.name = t.jsxIdentifier(attributeName);
           const className = attribute.value.value;
-          const twinExpression = t.taggedTemplateExpression(
-            t.identifier("tw"),
-            t.templateLiteral([t.templateElement({ raw: className, cooked: className })], [])
-          );
-          attribute.value = t.jsxExpressionContainer(twinExpression);
+          attribute.value = t.stringLiteral(className);
         });
       }
     },

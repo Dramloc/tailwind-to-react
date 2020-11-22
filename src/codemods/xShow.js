@@ -2,7 +2,7 @@ import { replaceXDataIdentifier } from "./replaceXData";
 import { xTransition } from "./xTransition";
 
 /**
- * Transform `x-show="expression"` AlpineJS JSX attributes into `css={!(expression) && tw`hidden`}`
+ * Transform `x-show="value"` AlpineJS JSX attributes into `className={clsx({ "hidden": !value })}`
  * @type {(babel: globalThis.babel) => babel.Visitor}
  */
 export const xShow = (babel) => {
@@ -66,39 +66,50 @@ export const xShow = (babel) => {
           }
         } else {
           // Handle case where there are no x-transition child with the same x-show value
+          // TODO: code similar to x-bind, could be replaced with x-bind:class="{ 'hidden': !value }"
           const expression = parse(`!(${value})`).program.body[0].expression;
           const className = "hidden";
-          const twinExpression = t.taggedTemplateExpression(
-            t.identifier("tw"),
-            t.templateLiteral([t.templateElement({ raw: className, cooked: className })], [])
-          );
-          const css = t.logicalExpression("&&", expression, twinExpression);
+          const clsx = t.objectExpression([
+            t.objectProperty(t.stringLiteral(className), expression),
+          ]);
 
           const siblings = [...path.getAllPrevSiblings(), ...path.getAllNextSiblings()];
           const existingAttribute = siblings.find(
-            (sibling) => t.isJSXAttribute(sibling.node) && sibling.node.name.name === "css"
+            (sibling) =>
+              t.isJSXAttribute(sibling.node) &&
+              t.isJSXIdentifier(sibling.node.name) &&
+              sibling.node.name.name === "className"
           );
-          if (
-            existingAttribute &&
-            t.isJSXAttribute(existingAttribute.node) &&
-            t.isJSXExpressionContainer(existingAttribute.node.value) &&
-            t.isArrayExpression(existingAttribute.node.value.expression)
-          ) {
-            existingAttribute.replaceWith(
-              t.jsxAttribute(
-                t.jsxIdentifier("css"),
-                t.jsxExpressionContainer(
-                  t.arrayExpression([...existingAttribute.node.value.expression.elements, css])
+          if (existingAttribute) {
+            if (
+              t.isJSXExpressionContainer(existingAttribute.node.value) &&
+              t.isCallExpression(existingAttribute.node.value.expression) &&
+              existingAttribute.node.value.expression.callee.name === "clsx"
+            ) {
+              // Expression is already a clsx call expression, push the new clsx object to the arguments
+              const clsxCall = existingAttribute.get("value.expression");
+              clsxCall.pushContainer("arguments", clsx);
+            }
+            if (t.isStringLiteral(existingAttribute.node.value)) {
+              // Existing className is a string, create a clsx expression
+              const className = existingAttribute.node.value;
+              existingAttribute.replaceWith(
+                t.jsxAttribute(
+                  t.jsxIdentifier("className"),
+                  t.jsxExpressionContainer(
+                    t.callExpression(t.identifier("clsx"), [className, clsx])
+                  )
                 )
-              )
-            );
+              );
+            }
             existingAttribute.traverse(replaceXDataIdentifier(babel), params);
             path.remove();
           } else {
+            // There is no existing className, create one with a clsx call expression
             path.replaceWith(
               t.jsxAttribute(
-                t.jsxIdentifier("css"),
-                t.jsxExpressionContainer(t.arrayExpression([css]))
+                t.jsxIdentifier("className"),
+                t.jsxExpressionContainer(t.callExpression(t.identifier("clsx"), [clsx]))
               )
             );
             path.traverse(replaceXDataIdentifier(babel), params);

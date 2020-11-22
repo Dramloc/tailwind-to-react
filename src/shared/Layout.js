@@ -1,14 +1,12 @@
-/** @jsxImportSource @emotion/react */
 import { Switch } from "@headlessui/react";
-import "twin.macro";
-import tw from "twin.macro";
+import clsx from "clsx";
 import { useColorMode } from "./ColorModeProvider";
 
-const Navbar = ({ start, center, end }) => {
+const Navbar = ({ start, end }) => {
   return (
-    <header tw="relative z-10 flex-none py-3 px-5 sm:px-6 flex items-center space-x-4 bg-white dark:bg-monaco-gray-900">
-      <div tw="flex-auto flex items-center min-w-0 space-x-5">{start}</div>
-      <div tw="flex items-center space-x-5">{end}</div>
+    <header className="relative z-10 flex-none py-3 px-5 sm:px-6 flex items-center space-x-4 bg-white dark:bg-gray-900">
+      <div className="flex-auto flex items-center min-w-0 space-x-5">{start}</div>
+      <div className="flex items-center space-x-5">{end}</div>
     </header>
   );
 };
@@ -20,36 +18,48 @@ const ColorModeSwitch = () => {
     <Switch
       checked={isEnabled}
       onChange={toggleColorMode}
-      tw="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:shadow-solid text-gray-300 dark:text-gray-500"
-      css={
-        isEnabled
-          ? tw`bg-indigo-600 dark:bg-indigo-500`
-          : tw`bg-monaco-gray-200 dark:bg-monaco-gray-800`
-      }
+      className={clsx(
+        "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:shadow-solid text-gray-300 dark:text-gray-500",
+        {
+          "bg-primary-600 dark:bg-primary-500": isEnabled,
+          "bg-gray-200 dark:bg-gray-800": !isEnabled,
+        }
+      )}
     >
-      <span tw="sr-only">Toggle color mode</span>
+      <span className="sr-only">Toggle color mode</span>
       <span
-        tw="relative inline-block h-5 w-5 rounded-full bg-white dark:bg-monaco-gray-900 shadow transition ease-in-out duration-200"
-        css={isEnabled ? tw`transform translate-x-5` : tw`transform translate-x-0`}
+        className={clsx(
+          "relative inline-block h-5 w-5 rounded-full bg-white dark:bg-gray-900 shadow transition ease-in-out duration-200 transform",
+          {
+            "translate-x-5": isEnabled,
+            "translate-x-0": !isEnabled,
+          }
+        )}
       >
         <span
-          tw="absolute inset-0 h-full w-full flex items-center justify-center transition-opacity"
-          css={
-            isEnabled ? tw`opacity-0 ease-in duration-200` : tw`opacity-100 ease-out duration-100`
-          }
+          className={clsx(
+            "absolute inset-0 h-full w-full flex items-center justify-center transition-opacity",
+            {
+              "opacity-0 ease-in duration-200": isEnabled,
+              "opacity-100 ease-out duration-100": !isEnabled,
+            }
+          )}
         >
-          <svg tw="h-4 w-4 text-monaco-gray-400" fill="currentColor" viewBox="0 0 20 20">
+          <svg className="h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
             <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
           </svg>
         </span>
         <span
-          tw="absolute inset-0 h-full w-full flex items-center justify-center transition-opacity"
-          css={
-            isEnabled ? tw`opacity-100 ease-out duration-100` : tw`opacity-0 ease-in duration-200`
-          }
+          className={clsx(
+            "absolute inset-0 h-full w-full flex items-center justify-center transition-opacity",
+            {
+              "opacity-100 ease-out duration-100": isEnabled,
+              "opacity-0 ease-in duration-200": !isEnabled,
+            }
+          )}
         >
           <svg
-            tw="h-4 w-4 text-indigo-600 dark:text-indigo-500"
+            className="h-4 w-4 text-primary-600 dark:text-primary-500"
             fill="currentColor"
             viewBox="0 0 20 20"
           >
@@ -67,8 +77,8 @@ const ColorModeSwitch = () => {
 
 export const Layout = ({ children }) => {
   return (
-    <div tw="h-screen flex overflow-hidden bg-monaco-gray-100 text-monaco-gray-800 dark:bg-monaco-gray-900 dark:text-white">
-      <div tw="flex flex-col w-0 flex-1 overflow-hidden">
+    <div className="h-screen flex overflow-hidden bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
+      <div className="flex flex-col w-0 flex-1 overflow-hidden">
         <Navbar end={<ColorModeSwitch />} />
         {children}
       </div>

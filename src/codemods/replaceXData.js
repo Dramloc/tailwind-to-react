@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import upperFirst from "lodash/fp/upperFirst";
+import { upperFirst } from "../shared/upperFirst";
 
 const warn = (caller, message) =>
   console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray(`${caller}[replace-x-data]`)} ${message}`);

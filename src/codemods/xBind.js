@@ -6,7 +6,7 @@ const warn = (message) =>
 
 /**
  * `x-bind:attribute="expression"` -> `attribute={expression}`
- * `x-bind:class="{'className': expression}"` -> `css={[expression && tw`className`]}`
+ * `x-bind:class="{'className': expression}"` -> `className={clsx(currentClassName, { [className]: expression })}`
  * @type {(babel: globalThis.babel) => babel.Visitor}
  */
 export const xBind = (babel) => {
@@ -40,29 +40,7 @@ export const xBind = (babel) => {
             path.remove();
             return;
           }
-          const properties = expression.properties;
-          const css = properties
-            .map((property) => {
-              if (!t.isObjectProperty(property)) {
-                warn("Expected x-bind:class parsed properties to be ObjectProperty");
-                return null;
-              }
-              if (!t.isIdentifier(property.key) && !t.isStringLiteral(property.key)) {
-                warn(
-                  "Expected x-bind:class parsed property key to be an Identifier or StringLiteral"
-                );
-                return null;
-              }
-              const className = t.isStringLiteral(property.key)
-                ? property.key.value
-                : property.key.name;
-              const twinExpression = t.taggedTemplateExpression(
-                t.identifier("tw"),
-                t.templateLiteral([t.templateElement({ raw: className, cooked: className })], [])
-              );
-              return t.logicalExpression("&&", property.value, twinExpression);
-            })
-            .filter(Boolean);
+          const clsx = expression;
 
           // Merge with existing css attribute or replace with a new css attribute
           const siblings = [...path.getAllPrevSiblings(), ...path.getAllNextSiblings()];
@@ -70,29 +48,38 @@ export const xBind = (babel) => {
             (sibling) =>
               t.isJSXAttribute(sibling.node) &&
               t.isJSXIdentifier(sibling.node.name) &&
-              sibling.node.name.name === "css"
+              sibling.node.name.name === "className"
           );
-          if (
-            existingAttribute &&
-            t.isJSXAttribute(existingAttribute.node) &&
-            t.isJSXExpressionContainer(existingAttribute.node.value) &&
-            t.isArrayExpression(existingAttribute.node.value.expression)
-          ) {
-            existingAttribute.replaceWith(
-              t.jsxAttribute(
-                t.jsxIdentifier("css"),
-                t.jsxExpressionContainer(
-                  t.arrayExpression([...existingAttribute.node.value.expression.elements, ...css])
+          if (existingAttribute) {
+            if (
+              t.isJSXExpressionContainer(existingAttribute.node.value) &&
+              t.isCallExpression(existingAttribute.node.value.expression) &&
+              existingAttribute.node.value.expression.callee.name === "clsx"
+            ) {
+              // Expression is already a clsx call expression, push the new clsx object to the arguments
+              const clsxCall = existingAttribute.get("value.expression");
+              clsxCall.pushContainer("arguments", clsx);
+            }
+            if (t.isStringLiteral(existingAttribute.node.value)) {
+              // Existing className is a string, create a clsx expression
+              const className = existingAttribute.node.value;
+              existingAttribute.replaceWith(
+                t.jsxAttribute(
+                  t.jsxIdentifier("className"),
+                  t.jsxExpressionContainer(
+                    t.callExpression(t.identifier("clsx"), [className, clsx])
+                  )
                 )
-              )
-            );
+              );
+            }
             existingAttribute.traverse(replaceXDataIdentifier(babel), params);
             path.remove();
           } else {
+            // There is no existing className, create one with a clsx call expression
             path.replaceWith(
               t.jsxAttribute(
-                t.jsxIdentifier("css"),
-                t.jsxExpressionContainer(t.arrayExpression(css))
+                t.jsxIdentifier("className"),
+                t.jsxExpressionContainer(t.callExpression(t.identifier("clsx"), [clsx]))
               )
             );
             path.traverse(replaceXDataIdentifier(babel), params);

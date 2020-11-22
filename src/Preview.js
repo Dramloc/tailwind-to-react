@@ -1,8 +1,6 @@
-/** @jsxImportSource @emotion/react */
+import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
-import "twin.macro";
-import tw from "twin.macro";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PreviewWorker from "workerize-loader!./PreviewWorker";
 import { Spinner } from "./shared/Spinner";
@@ -26,19 +24,16 @@ const template = `<!DOCTYPE html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="https://unpkg.com/tailwindcss@1.9.6/dist/base.min.css" />
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
   <body>
     <div id="root"></div>
-    <script>
-      window.process = {
-        env: {
-          NODE_ENV: "production"
-        }
-      }
-    </script>
-    <script>
+    <script src="https://unpkg.com/react@17.0.1/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@17.0.1/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.umd.production.min.js"></script>
+    <script src="https://unpkg.com/clsx@1.1.1/dist/clsx.min.js"></script>
+    <script type="module">
       // https://github.com/sveltejs/svelte-repl/blob/master/src/Output/srcdoc/index.html
       // https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
       document.body.addEventListener('click', event => {
@@ -60,29 +55,6 @@ const template = `<!DOCTYPE html>
         event.preventDefault();
       });
     </script>
-    <script type="importmap">
-    {
-      "imports": {
-        "react": "https://unpkg.com/es-react@16.13.1/react.js",
-        "react-dom": "https://unpkg.com/es-react@16.13.1/react-dom.js",
-        "react-is": "https://unpkg.com/es-react@16.13.1/react-is.js",
-        "@emotion/react": "https://unpkg.com/@emotion/react@11.1.1/dist/emotion-react.browser.esm.js",
-        "@emotion/cache": "https://unpkg.com/@emotion/cache@11.0.0/dist/emotion-cache.esm.js",
-        "@emotion/memoize": "https://unpkg.com/@emotion/memoize@0.7.4/dist/memoize.esm.js",
-        "@emotion/weak-memoize": "https://unpkg.com/@emotion/weak-memoize@0.2.5/dist/weak-memoize.esm.js",
-        "@emotion/utils": "https://unpkg.com/@emotion/utils@1.0.0/dist/emotion-utils.esm.js",
-        "@emotion/serialize": "https://unpkg.com/@emotion/serialize@1.0.0/dist/emotion-serialize.esm.js",
-        "@emotion/sheet": "https://unpkg.com/@emotion/sheet@1.0.0/dist/emotion-sheet.esm.js",
-        "@emotion/hash": "https://unpkg.com/@emotion/hash@0.8.0/dist/hash.esm.js",
-        "@emotion/unitless": "https://unpkg.com/@emotion/unitless@0.7.5/dist/unitless.esm.js",
-        "@babel/runtime/helpers/": "https://unpkg.com/@babel/runtime@7.12.5/helpers/esm/",
-        "@babel/runtime/helpers/esm/": "https://unpkg.com/@babel/runtime@7.12.5/helpers/esm/",
-        "stylis": "https://unpkg.com/stylis@4.0.3/dist/stylis.mjs",
-        "@headlessui/react": "https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.esm.js",
-        "hoist-non-react-statics": "/hoist-non-react-statics.js"
-      }
-    }
-    </script>
     <script type="module">
       window.addEventListener("message", ({ data }) => {
         if (data.type === "PREVIEW_CHANGED") {
@@ -93,7 +65,7 @@ const template = `<!DOCTYPE html>
           $script = document.createElement("script");
           $script.type = "module";
           $script.id = "preview";
-          $script.innerText = data.payload;
+          $script.innerHTML = data.payload;
           document.body.appendChild($script);
         }
       });
@@ -137,18 +109,23 @@ const Preview = ({ code }) => {
   }, [isReady, previewCode, status]);
 
   return (
-    <div tw="relative w-full h-full">
+    <div className="relative w-full h-full">
       <iframe
-        tw="absolute inset-0 h-full w-full"
+        className="absolute inset-0 h-full w-full"
         ref={iframeRef}
         title="Preview"
         srcDoc={template}
       />
       <div
-        tw="absolute inset-0 flex items-center justify-center bg-monaco-gray-200 dark:bg-monaco-gray-900 pointer-events-none transition-opacity duration-300 ease-in-out"
-        css={isReady && status !== "loading" ? tw`opacity-0` : tw`opacity-75`}
+        className={clsx(
+          "absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-900 pointer-events-none transition-opacity duration-300 ease-in-out",
+          {
+            "opacity-0": isReady && status !== "loading",
+            "opacity-75": !isReady || status === "loading",
+          }
+        )}
       >
-        <Spinner tw="mt-10">Loading preview</Spinner>
+        <Spinner className="mt-10">Loading preview</Spinner>
       </div>
     </div>
   );

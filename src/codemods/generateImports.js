@@ -1,69 +1,6 @@
-const getTransitionSource = (code) => {
-  if (!code.includes("<Transition")) {
-    return "";
-  }
-
-  return `
-    const Transition = ({
-      enter,
-      enterFrom,
-      enterTo,
-      leave,
-      leaveFrom,
-      leaveTo,
-      ...props
-    }) => {
-      return (
-        <ClassNames>
-          {({ css }) => (
-            <HeadlessUITransition
-              enter={enter && css(enter)}
-              enterFrom={enterFrom && css(enterFrom)}
-              enterTo={enterTo && css(enterTo)}
-              leave={leave && css(leave)}
-              leaveFrom={leaveFrom && css(leaveFrom)}
-              leaveTo={leaveTo && css(leaveTo)}
-              {...props}
-            />
-          )}
-        </ClassNames>
-      );
-    };
-
-    ${
-      code.includes("<Transition.Child")
-        ? `Transition.Child = ({
-      enter,
-      enterFrom,
-      enterTo,
-      leave,
-      leaveFrom,
-      leaveTo,
-      ...props
-    }) => {
-      return (
-        <ClassNames>
-          {({ css }) => (
-            <HeadlessUITransition.Child
-              enter={enter && css(enter)}
-              enterFrom={enterFrom && css(enterFrom)}
-              enterTo={enterTo && css(enterTo)}
-              leave={leave && css(leave)}
-              leaveFrom={leaveFrom && css(leaveFrom)}
-              leaveTo={leaveTo && css(leaveTo)}
-              {...props}
-            />
-          )}
-        </ClassNames>
-      );
-    };
-    `
-        : ""
-    }`;
-};
-
-export const generateImports = (code, { runtime = "automatic" } = {}) => {
-  const reactImports = runtime === "automatic" ? [] : ["Fragment"];
+/** @type {(code: string, options?: { type?: ("esm" | "umd") }) => string} */
+export const generateImports = (code, { type = "esm" } = {}) => {
+  const reactImports = [];
   if (code.includes("useEffect")) {
     reactImports.push("useEffect");
   }
@@ -76,28 +13,37 @@ export const generateImports = (code, { runtime = "automatic" } = {}) => {
   if (code.includes("useState")) {
     reactImports.push("useState");
   }
-  const reactImport =
-    reactImports.length === 0 ? "" : `import { ${reactImports.join(", ")} } from "react";`;
 
-  const emotionImports = runtime === "automatic" ? [] : ["jsx"];
+  const headlessUiImports = [];
   if (code.includes("<Transition")) {
-    emotionImports.push("ClassNames");
+    headlessUiImports.push("Transition");
   }
-  const emotionImport =
-    emotionImports.length === 0
-      ? ""
-      : `import { ${emotionImports.join(", ")} } from "@emotion/react";`;
 
-  const headlessUiImport = code.includes("<Transition")
-    ? 'import { Transition as HeadlessUITransition } from "@headlessui/react";'
-    : "";
+  switch (type) {
+    case "umd": {
+      const reactImport =
+        reactImports.length === 0 ? "" : `const { ${reactImports.join(", ")} } = React;`;
 
-  const twinImport = code.includes("tw`") ? 'import tw from "twin.macro";' : 'import "twin.macro";';
+      const clsxImport = code.includes("clsx") ? 'import clsx from "clsx";' : "";
 
-  const transitionSource = getTransitionSource(code);
+      const headlessUiImport =
+        headlessUiImports.length === 0
+          ? ""
+          : `const { ${headlessUiImports.join(", ")} } = headlessui;`;
+      return `${clsxImport}${headlessUiImport}${reactImport}`;
+    }
+    case "esm":
+    default: {
+      const reactImport =
+        reactImports.length === 0 ? "" : `import { ${reactImports.join(", ")} } from "react";`;
 
-  return `${runtime === "automatic" ? "/** @jsxImportSource @emotion/react */" : "/** @jsx jsx */"}
-  ${emotionImport}${headlessUiImport}${reactImport}${twinImport}
+      const clsxImport = code.includes("clsx") ? 'import clsx from "clsx";' : "";
 
-  ${transitionSource}`;
+      const headlessUiImport =
+        headlessUiImports.length === 0
+          ? ""
+          : `import { ${headlessUiImports.join(", ")} } from "@headlessui/react";`;
+      return `${clsxImport}${headlessUiImport}${reactImport}`;
+    }
+  }
 };

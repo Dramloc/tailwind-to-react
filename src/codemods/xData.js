@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import upperFirst from "lodash/fp/upperFirst";
+import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
 import { xOn } from "./xOn";

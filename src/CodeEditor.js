@@ -1,9 +1,8 @@
 import Editor from "@monaco-editor/react";
-import "twin.macro";
 import { useColorMode } from "./shared/ColorModeProvider";
 import { Spinner } from "./shared/Spinner";
 
-const CodeEditor = ({ value, onChange = () => {}, language, options, ...props }) => {
+const CodeEditor = ({ value, onChange = () => {}, language, options, className }) => {
   const { colorMode } = useColorMode();
   const onEditorDidMount = (_, editor) => {
     editor.onDidChangeModelContent(() => {
@@ -12,7 +11,7 @@ const CodeEditor = ({ value, onChange = () => {}, language, options, ...props })
   };
   return (
     <Editor
-      tw="w-full h-full"
+      className={className}
       loading={<Spinner>Loading editor</Spinner>}
       language={language}
       value={value}
@@ -25,7 +24,6 @@ const CodeEditor = ({ value, onChange = () => {}, language, options, ...props })
         minimap: { enabled: false },
         ...options,
       }}
-      {...props}
     />
   );
 };
