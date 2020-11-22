@@ -6,7 +6,6 @@
     "build:tailwind": "cross-env NODE_ENV=production postcss src/tailwind.css -o src/index.css",
     "watch:tailwind": "postcss -w src/tailwind.css -o src/index.css",
     "start:react": "react-scripts start",
-    "prestart": "run-s build:tailwind",
     "start": "npm-run-all --parallel watch:tailwind start:react",
     "prebuild": "run-s build:tailwind",
     "build": "react-scripts build",
@@ -30,7 +29,6 @@
     "clsx": "^1.1.1",
     "htmltojsx": "^0.3.0",
     "monaco-editor": "^0.21.2",
-    "npm-run-all": "^4.1.5",
     "postcss": "^8.1.8",
     "prettier": "^2.2.0",
     "react": "^17.0.1",
@@ -41,6 +39,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.2",
+    "npm-run-all": "^4.1.5",
     "postcss-cli": "^8.3.0",
     "react-scripts": "4.0.0"
   },
