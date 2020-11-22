@@ -5,10 +5,10 @@ import { usePaginatedQuery } from "react-query";
 import ConvertComponentWorker from "workerize-loader!./ConvertComponentWorker";
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PrettierWorker from "workerize-loader!./PrettierWorker";
-import CodeEditor from "./CodeEditor";
+import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
 import { example } from "./example.js";
-import Preview from "./Preview";
+import { Preview } from "./Preview";
 import { ColorModeProvider } from "./shared/ColorModeProvider";
 import { Layout } from "./shared/Layout";
 import { useDebounce } from "./shared/useDebounce";

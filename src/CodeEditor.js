@@ -2,7 +2,7 @@ import Editor from "@monaco-editor/react";
 import { useColorMode } from "./shared/ColorModeProvider";
 import { Spinner } from "./shared/Spinner";
 
-const CodeEditor = ({ value, onChange = () => {}, language, options, className }) => {
+export const CodeEditor = ({ value, onChange = () => {}, language, options, className }) => {
   const { colorMode } = useColorMode();
   const onEditorDidMount = (_, editor) => {
     editor.onDidChangeModelContent(() => {
@@ -27,5 +27,3 @@ const CodeEditor = ({ value, onChange = () => {}, language, options, className }
     />
   );
 };
-
-export default CodeEditor;

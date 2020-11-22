@@ -74,7 +74,7 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-const Preview = ({ code }) => {
+export const Preview = ({ code }) => {
   const iframeRef = useRef();
   const [isReady, setIsReady] = useState(false);
   const { status, data: previewCode } = useGeneratePreviewQuery(code);
@@ -130,5 +130,3 @@ const Preview = ({ code }) => {
     </div>
   );
 };
-
-export default Preview;
