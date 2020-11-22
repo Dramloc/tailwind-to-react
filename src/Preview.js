@@ -1,12 +1,15 @@
+// @ts-check
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
+// @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PreviewWorker from "workerize-loader!./PreviewWorker";
 import { Spinner } from "./shared/Spinner";
 
 const previewWorker = PreviewWorker();
 
+/** @type {(input: string) => import("react-query").QueryResult<string>} */
 const useGeneratePreviewQuery = (input) => {
   return useQuery(
     ["babel", input],
@@ -75,38 +78,40 @@ const template = `<!DOCTYPE html>
 </html>`;
 
 export const Preview = ({ code }) => {
-  const iframeRef = useRef();
+  const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
   const [isReady, setIsReady] = useState(false);
   const { status, data: previewCode } = useGeneratePreviewQuery(code);
+  const isLoading = status === "idle" || status === "loading" || !isReady;
 
   useEffect(() => {
     const $iframe = iframeRef.current;
-    if (!$iframe || !$iframe.contentWindow) {
+    if (!$iframe) {
       return;
     }
     const $iframeContentWindow = $iframe.contentWindow;
-    if (isReady && status === "success") {
-      $iframeContentWindow.postMessage({
-        type: "PREVIEW_CHANGED",
-        payload: previewCode,
-      });
+    if (!$iframeContentWindow) {
+      return;
     }
+    if (!isLoading) {
+      $iframeContentWindow.postMessage(
+        {
+          type: "PREVIEW_CHANGED",
+          payload: previewCode,
+        },
+        window.location.origin
+      );
+    }
+
     const listener = ({ data }) => {
       if (data.type === "PREVIEW_READY") {
         setIsReady(true);
-        if (status === "success") {
-          $iframeContentWindow.postMessage({
-            type: "PREVIEW_CHANGED",
-            payload: previewCode,
-          });
-        }
       }
     };
     $iframeContentWindow.addEventListener("message", listener);
     return () => {
       $iframeContentWindow.removeEventListener("message", listener);
     };
-  }, [isReady, previewCode, status]);
+  }, [isLoading, previewCode]);
 
   return (
     <div className="relative w-full h-full">
@@ -120,8 +125,8 @@ export const Preview = ({ code }) => {
         className={clsx(
           "absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-900 pointer-events-none transition-opacity duration-300 ease-in-out",
           {
-            "opacity-0": isReady && status !== "loading",
-            "opacity-75": !isReady || status === "loading",
+            "opacity-0": !isLoading,
+            "opacity-75": isLoading,
           }
         )}
       >
