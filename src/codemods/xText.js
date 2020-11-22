@@ -1,7 +1,7 @@
 import { replaceXDataIdentifier } from "./replaceXData";
 
 /**
- * @type {(babel: globalThis.babel) => babel.PluginObj}
+ * @type {(babel: globalThis.babel) => babel.Visitor}
  */
 export const xText = (babel) => {
   const { types: t, parse } = babel;

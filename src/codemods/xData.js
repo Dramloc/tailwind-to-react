@@ -1,3 +1,5 @@
+// @ts-check
+import { parseExpression } from "@babel/parser";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
@@ -6,6 +8,7 @@ import { xShow } from "./xShow";
 import { xText } from "./xText";
 import { xTransition } from "./xTransition";
 
+/** @type {(message: string) => void} */
 const warn = (message) => console.warn(`[x-data] ${message}`);
 
 /**
@@ -32,22 +35,21 @@ const warn = (message) => console.warn(`[x-data] ${message}`);
  * @type {(babel: globalThis.babel) => babel.PluginObj}
  */
 export const xData = (babel) => {
-  const { types: t, parse } = babel;
+  const { types: t } = babel;
   return {
     visitor: {
-      JSXAttribute(path, { mappings = {} } = {}) {
+      JSXAttribute(path, { mappings = {} }) {
         if (t.isJSXIdentifier(path.node.name) && path.node.name.name === "x-data") {
           if (!t.isStringLiteral(path.node.value)) {
             warn("Expected x-data to be a StringLiteral");
           }
           const value = t.isStringLiteral(path.node.value) ? path.node.value.value : "{}";
           // Parse x-data expression using babel.
-          // Variable declaration is used to avoid expression being interpreted as a BlockStatement.
-          const parsedXData = parse(`const xData = ${value}`).program.body[0].declarations[0].init;
+          const parsedXData = parseExpression(value);
 
           if (!t.isObjectExpression(parsedXData)) {
             // Check that expression can be handled, for now expressions like x-data="radioGroup()" are not handled
-            warn(`Directive ${value} is not handled yet.`);
+            warn(`xData expression ${value} is not handled yet.`);
           }
           const properties = t.isObjectExpression(parsedXData) ? parsedXData.properties : [];
 
@@ -62,18 +64,23 @@ export const xData = (babel) => {
               }
               // ObjectProperty (e.g. `{ value: true }`):
               // - The object property is converted to a `useState` (e.g.: `const [value, setValue] = useState(true);`)
-              // - A unique binding name is generated (e.g.: `value` becomes `_value` and `setValue` becoms `_setValue`)
+              // - A unique binding name is generated (e.g.: `value` becomes `_value` and `setValue` becomes `_setValue`)
               // - The `useState` initial state uses the value of the property
               const state = property.key.name;
               const setState = `set${upperFirst(state)}`;
               const stateIdentifier = path.scope.generateUidIdentifier(state);
               const setStateIdentifier = path.scope.generateUidIdentifier(setState);
-              const initialState = property.value;
-              const useState = t.identifier("useState");
+              if (!t.isExpression(property.value)) {
+                warn("Expected property value to be an Expression");
+              }
+              const initialState = t.isExpression(property.value) ? property.value : null;
               path.scope.push({
                 kind: "const",
                 id: t.arrayPattern([stateIdentifier, setStateIdentifier]),
-                init: t.callExpression(useState, [initialState]),
+                init: t.callExpression(
+                  t.identifier("useState"),
+                  initialState !== null ? [initialState] : []
+                ),
                 unique: true,
               });
               // Add the mapping between the original name (e.g.: `value`) and the unique binding name (e.g.: `_value`)
