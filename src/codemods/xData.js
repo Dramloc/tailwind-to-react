@@ -1,4 +1,3 @@
-import chalk from "chalk";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
@@ -7,8 +6,7 @@ import { xShow } from "./xShow";
 import { xText } from "./xText";
 import { xTransition } from "./xTransition";
 
-const warn = (message) =>
-  console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray("[x-data]")} ${message}`);
+const warn = (message) => console.warn(`[x-data] ${message}`);
 
 /**
  * Babel plugin to transform AlpineJS `x-data` JSX attribute into React `useState` statements.
@@ -49,7 +47,7 @@ export const xData = (babel) => {
 
           if (!t.isObjectExpression(parsedXData)) {
             // Check that expression can be handled, for now expressions like x-data="radioGroup()" are not handled
-            warn(`Directive ${chalk.cyan(value)} is not handled yet.`);
+            warn(`Directive ${value} is not handled yet.`);
           }
           const properties = t.isObjectExpression(parsedXData) ? parsedXData.properties : [];
 

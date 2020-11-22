@@ -1,8 +1,6 @@
-import chalk from "chalk";
 import { replaceXDataIdentifier } from "./replaceXData";
 
-const warn = (message) =>
-  console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray("[x-bind]")} ${message}`);
+const warn = (message) => console.warn(`[x-bind] ${message}`);
 
 /**
  * `x-bind:attribute="expression"` -> `attribute={expression}`

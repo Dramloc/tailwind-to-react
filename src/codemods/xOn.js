@@ -1,9 +1,7 @@
-import chalk from "chalk";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 
-const warn = (message) =>
-  console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray("[x-on]")} ${message}`);
+const warn = (message) => console.warn(`[x-on] ${message}`);
 
 /**
  * @type {(babel: globalThis.babel) => babel.Visitor}
@@ -37,7 +35,7 @@ export const xOn = (babel) => {
               return true;
             }
             // TODO:
-            warn(`Statement ${chalk.cyan(value)} is not handled yet.`);
+            warn(`Statement ${value} is not handled yet.`);
             return false;
           })
           .map((statement) => statement.expression);
@@ -140,7 +138,7 @@ export const xOn = (babel) => {
         ];
         for (let modifier of modifiers) {
           if (!handledModifiers.includes(modifier)) {
-            warn(`Unhandled modifier ${chalk.cyan(modifier)}.`);
+            warn(`Unhandled modifier ${modifier}.`);
           }
         }
 

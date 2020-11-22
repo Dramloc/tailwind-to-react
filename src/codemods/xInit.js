@@ -1,7 +1,4 @@
-import chalk from "chalk";
-
-const warn = (message) =>
-  console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray("[x-init]")} ${message}`);
+const warn = (message) => console.warn(`[x-init] ${message}`);
 
 /**
  * `x-init="$el.focus()"` -> `const initRef = useRef(); useEffect(() => if (initRef.current) { initRef.current.focus(); }, []); ... ref={initRef}`
@@ -30,7 +27,7 @@ export const xInit = ({ types: t, parse }) => ({
           return;
         }
         // TODO:
-        warn(`Directive ${chalk.cyan(value)} is not handled yet.`);
+        warn(`Directive ${value} is not handled yet.`);
         path.remove();
       }
     },

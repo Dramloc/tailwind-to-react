@@ -1,8 +1,6 @@
-import chalk from "chalk";
 import { upperFirst } from "../shared/upperFirst";
 
-const warn = (caller, message) =>
-  console.warn(`    ${chalk.yellow("⚠")} ${chalk.gray(`${caller}[replace-x-data]`)} ${message}`);
+const warn = (caller, message) => console.warn(`${caller}[replace-x-data] ${message}`);
 
 /**
  * @type {(babel: globalThis.babel) => babel.Visitor}
@@ -35,7 +33,7 @@ export const replaceXDataAssignment = ({ types: t }) => ({
       const setState = `set${upperFirst(state)}`;
       const _setState = mappings[setState];
       if (!_setState) {
-        warn(caller, `State ${chalk.cyan(state)} is not declared.`);
+        warn(caller, `State ${state} is not declared.`);
         path.remove();
         return;
       }
@@ -48,7 +46,7 @@ export const replaceXDataAssignment = ({ types: t }) => ({
       const setState = `set${upperFirst(state)}`;
       const _setState = mappings[setState];
       if (!_setState) {
-        warn(caller, `isMemberExpression State ${chalk.cyan(state)} is not declared.`);
+        warn(caller, `State ${state} is not declared.`);
         return;
       }
       path.replaceWith(t.expressionStatement(t.callExpression(_setState, [path.node.right])));
