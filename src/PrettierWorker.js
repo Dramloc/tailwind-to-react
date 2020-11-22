@@ -5,6 +5,5 @@ export const format = (source) => {
   return prettier.format(source, {
     parser: "babel",
     plugins: [parserBabel],
-    printWidth: 100,
   });
 };
