@@ -1,5 +1,5 @@
 export const example = `<!--
-  Tailwind + Alpine 🔀 React + Emotion + twin.macro
+  Tailwind + Alpine 🔀 React
 
   Once you are happy with your component in the "Input" panel,
   grab the React code in the "Output" panel and "it just works™"
