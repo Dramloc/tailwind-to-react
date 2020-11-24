@@ -24,13 +24,11 @@ export const generateImports = (code, { type = "esm" } = {}) => {
       const reactImport =
         reactImports.length === 0 ? "" : `const { ${reactImports.join(", ")} } = React;`;
 
-      const clsxImport = code.includes("clsx") ? 'import clsx from "clsx";' : "";
-
       const headlessUiImport =
         headlessUiImports.length === 0
           ? ""
           : `const { ${headlessUiImports.join(", ")} } = headlessui;`;
-      return `${clsxImport}${headlessUiImport}${reactImport}`;
+      return `${headlessUiImport}${reactImport}`;
     }
     case "esm":
     default: {
