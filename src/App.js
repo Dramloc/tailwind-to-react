@@ -1,7 +1,10 @@
+// @ts-check
 import { useState } from "react";
-import { usePaginatedQuery } from "react-query";
+import { useQuery } from "react-query";
+// @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import ConvertComponentWorker from "workerize-loader!./ConvertComponentWorker";
+// @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PrettierWorker from "workerize-loader!./PrettierWorker";
 import { CodeEditor } from "./CodeEditor";
@@ -9,6 +12,7 @@ import { generateImports } from "./codemods/generateImports";
 import { example } from "./example.js";
 import { Preview } from "./Preview";
 import { ColorModeProvider } from "./shared/ColorModeProvider";
+import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Layout } from "./shared/Layout";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
@@ -17,14 +21,14 @@ import { useMedia } from "./shared/useMedia";
 const convertComponentWorker = ConvertComponentWorker();
 const prettierWorker = PrettierWorker();
 
-/** @type {(html: string) => import("react-query").PaginatedQueryResult<string>} */
+/** @type {(html: string) => import("react-query").QueryResult<string>} */
 const useConvertComponentQuery = (html) => {
-  return usePaginatedQuery(["convert", html], async () => convertComponentWorker.convert(html));
+  return useQuery(["convert", html], async () => convertComponentWorker.convert(html));
 };
 
-/** @type {(source: string) => import("react-query").PaginatedQueryResult<string>} */
+/** @type {(source: string) => import("react-query").QueryResult<string>} */
 const usePrettierQuery = (source) => {
-  return usePaginatedQuery(["prettier", source], async () => prettierWorker.format(source), {
+  return useQuery(["prettier", source], async () => prettierWorker.format(source), {
     enabled: source,
   });
 };
@@ -33,14 +37,21 @@ const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
 
-  const { resolvedData: convertedComponent } = useConvertComponentQuery(debouncedInput);
-  const { resolvedData: prettifiedComponent } = usePrettierQuery(
+  const { status, data: convertedComponent, error } = useConvertComponentQuery(debouncedInput);
+  const { data: prettifiedComponent } = usePrettierQuery(
     convertedComponent
       ? `${generateImports(convertedComponent, { type: "esm" })}\n\nexport ${convertedComponent}`
       : null
   );
 
   const isMd = useMedia(["(min-width: 768px)"], [true], false);
+
+  const preview = (
+    <div className="relative w-full h-full">
+      <Preview code={convertedComponent} isInputLoading={status === "loading"} />
+      <ErrorOverlay origin="Conversion" error={error} />
+    </div>
+  );
 
   return (
     <>
@@ -66,14 +77,10 @@ const App = () => {
                     />
                   )}
                 </TabPanel>
-                {!isMd && (
-                  <TabPanel>
-                    <Preview code={convertedComponent} />
-                  </TabPanel>
-                )}
+                {!isMd && <TabPanel>{preview}</TabPanel>}
               </TabPanels>
             </Tabs>
-            {isMd && <Preview code={convertedComponent} />}
+            {isMd && preview}
           </main>
         </Layout>
       </ColorModeProvider>

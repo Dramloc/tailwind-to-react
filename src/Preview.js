@@ -5,21 +5,16 @@ import { useQuery } from "react-query";
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PreviewWorker from "workerize-loader!./PreviewWorker";
+import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
 
 const previewWorker = PreviewWorker();
 
 /** @type {(input: string) => import("react-query").QueryResult<string>} */
 const useGeneratePreviewQuery = (input) => {
-  return useQuery(
-    ["babel", input],
-    async () => {
-      return previewWorker.transform(input);
-    },
-    {
-      enabled: input,
-    }
-  );
+  return useQuery(["babel", input], async () => previewWorker.transform(input), {
+    enabled: input,
+  });
 };
 
 const template = `<!DOCTYPE html>
@@ -36,6 +31,7 @@ const template = `<!DOCTYPE html>
     <script src="https://unpkg.com/react-dom@17.0.1/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.umd.production.min.js"></script>
     <script src="https://unpkg.com/clsx@1.1.1/dist/clsx.min.js"></script>
+    <script src="https://unpkg.com/react-error-boundary@3.0.2/dist/react-error-boundary.umd.min.js"></script>
     <script type="module">
       // https://github.com/sveltejs/svelte-repl/blob/master/src/Output/srcdoc/index.html
       // https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
@@ -77,11 +73,12 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-export const Preview = ({ code }) => {
+export const Preview = ({ code, isInputLoading }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
   const [isReady, setIsReady] = useState(false);
   const { status, data: previewCode } = useGeneratePreviewQuery(code);
-  const isLoading = status === "idle" || status === "loading" || !isReady;
+  const [error, setError] = useState(null);
+  const isLoading = isInputLoading || status === "idle" || status === "loading" || !isReady;
 
   useEffect(() => {
     const $iframe = iframeRef.current;
@@ -93,6 +90,7 @@ export const Preview = ({ code }) => {
       return;
     }
     if (!isLoading) {
+      setError(null);
       $iframeContentWindow.postMessage(
         {
           type: "PREVIEW_CHANGED",
@@ -106,6 +104,9 @@ export const Preview = ({ code }) => {
       if (data.type === "PREVIEW_READY") {
         setIsReady(true);
       }
+      if (data.type === "PREVIEW_ERROR") {
+        setError(data.payload);
+      }
     };
     $iframeContentWindow.addEventListener("message", listener);
     return () => {
@@ -114,7 +115,7 @@ export const Preview = ({ code }) => {
   }, [isLoading, previewCode]);
 
   return (
-    <div className="relative w-full h-full">
+    <>
       <iframe
         className="absolute inset-0 h-full w-full"
         ref={iframeRef}
@@ -132,6 +133,7 @@ export const Preview = ({ code }) => {
       >
         <Spinner className="mt-10">Loading preview</Spinner>
       </div>
-    </div>
+      <ErrorOverlay origin="Runtime" error={error} />
+    </>
   );
 };

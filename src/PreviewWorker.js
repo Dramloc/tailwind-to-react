@@ -9,11 +9,19 @@ export const transform = async (componentCode) => {
 
   ${componentCode}
 
+  const App = () => {
+    return (
+      <ReactErrorBoundary.ErrorBoundary fallback={<span>Error while rendering component</span>} onError={(error) => window.postMessage({ type: "PREVIEW_ERROR", payload: error })}>
+        <Component />
+      </ReactErrorBoundary.ErrorBoundary>
+    );
+  };
+
   const rootElement = document.getElementById("root");
   if (rootElement.hasChildNodes()) {
-    hydrate(<Component />, rootElement);
+    hydrate(<App />, rootElement);
   } else {
-    render(<Component />, rootElement);
+    render(<App />, rootElement);
   }`;
   const { code } = await transformAsync(template, {
     presets: [
