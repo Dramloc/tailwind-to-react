@@ -1,4 +1,7 @@
 // @ts-check
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
 import { useQuery } from "react-query";
 // @ts-ignore
@@ -9,11 +12,12 @@ import ConvertComponentWorker from "workerize-loader!./ConvertComponentWorker";
 import PrettierWorker from "workerize-loader!./PrettierWorker";
 import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
-import { example } from "./example.js";
+import { ExampleDropdown } from "./examples/ExampleDropdown";
 import { Preview } from "./Preview";
 import { ColorModeProvider } from "./shared/ColorModeProvider";
+import { ColorModeSwitch } from "./shared/ColorModeSwitch";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
-import { Layout } from "./shared/Layout";
+import { Navbar } from "./shared/Navbar";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
 import { useMedia } from "./shared/useMedia";
@@ -54,9 +58,20 @@ const App = () => {
   );
 
   return (
-    <>
-      <ColorModeProvider>
-        <Layout>
+    <ColorModeProvider>
+      <div className="h-screen flex overflow-hidden bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
+        <div className="flex flex-col w-0 flex-1 overflow-hidden">
+          <Navbar
+            start={
+              <ExampleDropdown
+                onChange={async (example) => {
+                  const module = await example.load();
+                  setInput(module.default);
+                }}
+              />
+            }
+            end={<ColorModeSwitch />}
+          />
           <main className="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
             <Tabs>
               <TabList>
@@ -82,9 +97,9 @@ const App = () => {
             </Tabs>
             {isMd && preview}
           </main>
-        </Layout>
-      </ColorModeProvider>
-    </>
+        </div>
+      </div>
+    </ColorModeProvider>
   );
 };
 

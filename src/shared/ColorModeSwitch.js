@@ -2,16 +2,7 @@ import { Switch } from "@headlessui/react";
 import clsx from "clsx";
 import { useColorMode } from "./ColorModeProvider";
 
-const Navbar = ({ start, end }) => {
-  return (
-    <header className="relative z-10 flex-none py-3 px-5 sm:px-6 flex items-center space-x-4 bg-white dark:bg-gray-900">
-      <div className="flex-auto flex items-center min-w-0 space-x-5">{start}</div>
-      <div className="flex items-center space-x-5">{end}</div>
-    </header>
-  );
-};
-
-const ColorModeSwitch = () => {
+export const ColorModeSwitch = () => {
   const { colorMode, toggleColorMode } = useColorMode();
   const isEnabled = colorMode === "light";
   return (
@@ -19,7 +10,7 @@ const ColorModeSwitch = () => {
       checked={isEnabled}
       onChange={toggleColorMode}
       className={clsx(
-        "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-300 dark:focus:ring-gray-700 focus:ring-offset-white dark:focus:ring-offset-gray-900 text-gray-300 dark:text-gray-500",
+        "relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-gray-700 focus:ring-offset-white dark:focus:ring-offset-gray-900 text-gray-300 dark:text-gray-500",
         {
           "bg-primary-600 dark:bg-primary-500": isEnabled,
           "bg-gray-200 dark:bg-gray-800": !isEnabled,
@@ -72,16 +63,5 @@ const ColorModeSwitch = () => {
         </span>
       </span>
     </Switch>
-  );
-};
-
-export const Layout = ({ children }) => {
-  return (
-    <div className="h-screen flex overflow-hidden bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
-      <div className="flex flex-col w-0 flex-1 overflow-hidden">
-        <Navbar end={<ColorModeSwitch />} />
-        {children}
-      </div>
-    </div>
   );
 };
