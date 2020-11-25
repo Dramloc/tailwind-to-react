@@ -4,15 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import PreviewWorker from "workerize-loader!./PreviewWorker";
+import BabelWorker from "workerize-loader!./BabelWorker";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
 
-const previewWorker = PreviewWorker();
+const babelWorker = BabelWorker();
 
 /** @type {(input: string) => import("react-query").QueryResult<string>} */
 const useGeneratePreviewQuery = (input) => {
-  return useQuery(["babel", input], async () => previewWorker.transform(input), {
+  return useQuery(["babel", input], async () => babelWorker.generatePreview(input), {
     enabled: input,
   });
 };

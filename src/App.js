@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useQuery } from "react-query";
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import ConvertComponentWorker from "workerize-loader!./ConvertComponentWorker";
+import BabelWorker from "workerize-loader!./BabelWorker";
 // @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import PrettierWorker from "workerize-loader!./PrettierWorker";
@@ -22,12 +22,12 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
 import { useMedia } from "./shared/useMedia";
 
-const convertComponentWorker = ConvertComponentWorker();
+const babelWorker = BabelWorker();
 const prettierWorker = PrettierWorker();
 
 /** @type {(html: string) => import("react-query").QueryResult<string>} */
 const useConvertComponentQuery = (html) => {
-  return useQuery(["convert", html], async () => convertComponentWorker.convert(html));
+  return useQuery(["convert", html], async () => babelWorker.convert(html));
 };
 
 /** @type {(source: string) => import("react-query").QueryResult<string>} */
