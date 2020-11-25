@@ -4,12 +4,6 @@
 import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
 import { useQuery } from "react-query";
-// @ts-ignore
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import BabelWorker from "workerize-loader!./BabelWorker";
-// @ts-ignore
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import PrettierWorker from "workerize-loader!./PrettierWorker";
 import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
 import { ExampleDropdown } from "./examples/ExampleDropdown";
@@ -21,9 +15,7 @@ import { Navbar } from "./shared/Navbar";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
 import { useMedia } from "./shared/useMedia";
-
-const babelWorker = BabelWorker();
-const prettierWorker = PrettierWorker();
+import { babelWorker, prettierWorker } from "./workers";
 
 /** @type {(html: string) => import("react-query").QueryResult<string>} */
 const useConvertComponentQuery = (html) => {

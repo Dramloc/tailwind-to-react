@@ -2,13 +2,9 @@
 import clsx from "clsx";
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
-// @ts-ignore
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import BabelWorker from "workerize-loader!./BabelWorker";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
-
-const babelWorker = BabelWorker();
+import { babelWorker } from "./workers";
 
 /** @type {(input: string) => import("react-query").QueryResult<string>} */
 const useGeneratePreviewQuery = (input) => {

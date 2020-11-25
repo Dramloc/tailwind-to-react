@@ -1,7 +1,7 @@
 import { transformAsync } from "@babel/core";
 import babelPresetReact from "@babel/preset-react";
-import { convertComponent } from "./codemods/convertComponent";
-import { generateImports } from "./codemods/generateImports";
+import { convertComponent } from "../codemods/convertComponent";
+import { generateImports } from "../codemods/generateImports";
 
 export const convert = async (html) => {
   const { code } = await convertComponent({ name: "Component", html });
