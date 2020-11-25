@@ -1,11 +1,11 @@
 import { transformAsync } from "@babel/core";
-import buildAllSyntaxPlugin from "@codemod/core/src/AllSyntaxPlugin";
-import RecastPlugin from "@codemod/core/src/RecastPlugin";
+import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
+import { recastPlugin } from "./convertComponent";
 import { xData } from "./xData";
 
 const transform = async (code) => {
   return transformAsync(code, {
-    plugins: [xData, buildAllSyntaxPlugin("unambiguous"), RecastPlugin],
+    plugins: [xData, pluginSyntaxJsx, recastPlugin],
   });
 };
 
@@ -44,7 +44,6 @@ test("should replace element with x-transition attributes with a Transition comp
   );\r
 }`);
 });
-
 
 test("should replace element with x-transition attributes with a Transition.Child component if there is a parent element with the same x-show expression", async () => {
   const { code } = await transform(`const Component = () => {
@@ -105,8 +104,6 @@ test("should replace element with x-transition attributes with a Transition.Chil
   );\r
 }`);
 });
-
-
 
 test("should handle nested transitions with different x-show values", async () => {
   const { code } = await transform(`const Component = () => {

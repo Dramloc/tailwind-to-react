@@ -1,12 +1,27 @@
 import { transformAsync } from "@babel/core";
-import buildAllSyntaxPlugin from "@codemod/core/src/AllSyntaxPlugin";
-import RecastPlugin from "@codemod/core/src/RecastPlugin";
+import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
 import HTMLtoJSX from "htmltojsx";
+import { parse as recastParse, print as recastPrint } from "recast";
 import { removeUnusedJSXAttributes } from "./removeUnusedJSXAttributes";
 import { reorderJSXAttributes } from "./reorderJSXAttributes";
 import { xData } from "./xData";
 import { xDescription } from "./xDescription";
 import { xInit } from "./xInit";
+
+export const recastPlugin = () => ({
+  parserOverride: (code, options, parse) => {
+    return recastParse(code, {
+      parser: {
+        parse(code) {
+          return parse(code, { ...options, tokens: true });
+        },
+      },
+    });
+  },
+  generatorOverride: (ast) => {
+    return recastPrint(ast, { sourceMapName: "map.json" });
+  },
+});
 
 /** @type {(component: { name: string, html: string }) => Promise<import("@babel/core").BabelFileResult>} */
 export const convertComponent = ({ name, html }) => {
@@ -37,8 +52,8 @@ return (
       xDescription,
       xData,
       xInit,
-      buildAllSyntaxPlugin("unambiguous"),
-      RecastPlugin,
+      pluginSyntaxJsx,
+      recastPlugin,
     ],
   });
 };

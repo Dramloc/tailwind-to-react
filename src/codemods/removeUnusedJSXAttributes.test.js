@@ -1,11 +1,11 @@
 import { transformAsync } from "@babel/core";
-import buildAllSyntaxPlugin from "@codemod/core/src/AllSyntaxPlugin";
-import RecastPlugin from "@codemod/core/src/RecastPlugin";
+import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
+import { recastPlugin } from "./convertComponent";
 import { removeUnusedJSXAttributes } from "./removeUnusedJSXAttributes";
 
 const transform = async (code) => {
   return transformAsync(code, {
-    plugins: [removeUnusedJSXAttributes, buildAllSyntaxPlugin("unambiguous"), RecastPlugin],
+    plugins: [removeUnusedJSXAttributes, pluginSyntaxJsx, recastPlugin],
   });
 };
 
