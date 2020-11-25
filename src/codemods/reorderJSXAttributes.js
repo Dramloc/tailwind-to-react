@@ -10,7 +10,7 @@ import { isJSXAttributeWithName } from "./utils";
 export const reorderJSXAttributes = () => {
   /**
    * Move the attribute with the given `jsxIdentifierName` to first position if it exists in the openingElement attributes.
-   * @type {(jsxIdentifierName: string, jsxOpeningElement: import("@babel/core").NodePath<import("@babel/types").JSXOpeningElement>) => void}
+   * @type {(jsxIdentifierName: string, jsxOpeningElement: import("@babel/core").NodePath<import("@babel/core").types.JSXOpeningElement>) => void}
    */
   const moveAttributeToFirstPosition = (jsxIdentifierName, jsxOpeningElement) => {
     const attributeIndex = jsxOpeningElement.node.attributes.findIndex(

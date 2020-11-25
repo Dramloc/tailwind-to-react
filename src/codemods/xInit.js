@@ -1,5 +1,4 @@
-import { parse } from "@babel/parser";
-import * as t from "@babel/types";
+import { parse, types as t } from "@babel/core";
 
 const warn = (message) => console.warn(`[x-init] ${message}`);
 

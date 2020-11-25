@@ -1,5 +1,5 @@
 // @ts-check
-import * as t from "@babel/types";
+import { types as t } from "@babel/core";
 import { replaceXDataIdentifier } from "./replaceXData";
 
 /** @typedef {t.JSXAttribute & { name: t.JSXIdentifier }} JSXAttributeWithName */

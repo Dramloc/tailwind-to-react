@@ -1,6 +1,6 @@
 // @ts-check
 import { parseExpression } from "@babel/parser";
-import * as t from "@babel/types";
+import { types as t } from "@babel/core";
 import { replaceXDataIdentifier } from "./replaceXData";
 import { isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
 

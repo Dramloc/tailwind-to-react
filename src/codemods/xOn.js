@@ -1,6 +1,5 @@
 // @ts-check
-import { parse } from "@babel/parser";
-import * as t from "@babel/types";
+import { parse, types as t } from "@babel/core";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { isJSXAttributeWithName } from "./utils";

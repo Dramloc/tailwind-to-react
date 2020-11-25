@@ -1,4 +1,4 @@
-import * as t from "@babel/types";
+import { types as t } from "@babel/core";
 import { upperFirst } from "../shared/upperFirst";
 
 const warn = (caller, message) => console.warn(`${caller}[replace-x-data] ${message}`);

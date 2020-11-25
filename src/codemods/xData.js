@@ -1,6 +1,6 @@
 // @ts-check
 import { parseExpression } from "@babel/parser";
-import * as t from "@babel/types";
+import { types as t } from "@babel/core";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
