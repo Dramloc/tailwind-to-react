@@ -86,5 +86,6 @@ You can use the following Alpine JS directives to create dynamic state:
 
 - [] Support for custom tailwind config
 - [] [twin.macro](https://github.com/ben-rogerson/twin.macro) support
+- [] Reduce babel worker payload size
 
 Have fun!
