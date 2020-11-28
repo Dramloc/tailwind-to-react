@@ -64,7 +64,7 @@ const template = `<!DOCTYPE html>
           document.body.appendChild($script);
         }
       });
-      window.postMessage({ type: "PREVIEW_READY" });
+      window.postMessage({ type: "PREVIEW_READY" }, window.location.ancestorOrigins[0]);
     </script>
   </body>
 </html>`;
