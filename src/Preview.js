@@ -28,7 +28,7 @@ const template = `<!DOCTYPE html>
     <script src="https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.umd.production.min.js"></script>
     <script src="https://unpkg.com/clsx@1.1.1/dist/clsx.min.js"></script>
     <script src="https://unpkg.com/react-error-boundary@3.0.2/dist/react-error-boundary.umd.min.js"></script>
-    <script type="module">
+    <script>
       // https://github.com/sveltejs/svelte-repl/blob/master/src/Output/srcdoc/index.html
       // https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
       document.body.addEventListener('click', event => {
@@ -50,7 +50,7 @@ const template = `<!DOCTYPE html>
         event.preventDefault();
       });
     </script>
-    <script type="module">
+    <script>
       window.addEventListener("message", ({ data }) => {
         if (data.type === "PREVIEW_CHANGED") {
           let $script = document.getElementById("preview");
@@ -58,7 +58,8 @@ const template = `<!DOCTYPE html>
             $script.remove();
           }
           $script = document.createElement("script");
-          $script.type = "module";
+          // Allow Safari to dynamically execute script, see https://www.html5rocks.com/en/tutorials/speed/script-loading/
+          $script.async = false;
           $script.id = "preview";
           $script.innerHTML = data.payload;
           document.body.appendChild($script);

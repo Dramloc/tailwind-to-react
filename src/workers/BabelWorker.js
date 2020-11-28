@@ -10,6 +10,7 @@ export const convert = async (html) => {
 
 export const generatePreview = async (componentCode) => {
   const template = `
+(() => {
   ${generateImports(componentCode, { type: "umd" })}
   const { hydrate, render } = ReactDOM;
 
@@ -28,7 +29,8 @@ export const generatePreview = async (componentCode) => {
     hydrate(<App />, rootElement);
   } else {
     render(<App />, rootElement);
-  }`;
+  }
+})();`;
   const { code } = await transformAsync(template, {
     presets: [
       [
