@@ -13,11 +13,11 @@ export const useMedia = (queries, values, defaultValue) => {
 
   useEffect(() => {
     const handler = () => setValue(getValue);
-    mediaQueryLists.forEach((mediaQueryList) => mediaQueryList.addEventListener("change", handler));
+    // FIXME: addListener(handler) should be replaced with addEventListener("change", handler) when browser support allows it
+    mediaQueryLists.forEach((mediaQueryList) => mediaQueryList.addListener(handler));
     return () =>
-      mediaQueryLists.forEach((mediaQueryList) =>
-        mediaQueryList.removeEventListener("change", handler)
-      );
+      // FIXME: removeListener(handler) should be replaced with removeEventListener("change", handler) when browser support allows it
+      mediaQueryLists.forEach((mediaQueryList) => mediaQueryList.removeListener(handler));
   }, [getValue, mediaQueryLists]);
 
   return value;
