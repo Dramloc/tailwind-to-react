@@ -8,7 +8,6 @@ import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
 import { ExampleDropdown } from "./examples/ExampleDropdown";
 import { Preview } from "./Preview";
-import { ColorModeProvider } from "./shared/ColorModeProvider";
 import { ColorModeSwitch } from "./shared/ColorModeSwitch";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Navbar } from "./shared/Navbar";
@@ -50,48 +49,50 @@ const App = () => {
   );
 
   return (
-    <ColorModeProvider>
-      <div className="h-screen flex overflow-hidden bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-white">
-        <div className="flex flex-col w-0 flex-1 overflow-hidden">
-          <Navbar
-            start={
-              <ExampleDropdown
-                onChange={async (example) => {
-                  const module = await example.load();
-                  setInput(module.default);
-                }}
-              />
-            }
-            end={<ColorModeSwitch />}
+    <>
+      <Navbar
+        start={
+          <ExampleDropdown
+            onChange={async (example) => {
+              const module = await example.load();
+              setInput(module.default);
+            }}
           />
-          <main className="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
-            <Tabs>
-              <TabList>
-                <Tab>Input</Tab>
-                <Tab>Output</Tab>
-                {!isMd && <Tab>Preview</Tab>}
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <CodeEditor value={input} onChange={setInput} language="html" />
-                </TabPanel>
-                <TabPanel>
-                  {prettifiedComponent && (
-                    <CodeEditor
-                      value={prettifiedComponent}
-                      options={{ readOnly: true }}
-                      language="javascript"
-                    />
-                  )}
-                </TabPanel>
-                {!isMd && <TabPanel>{preview}</TabPanel>}
-              </TabPanels>
-            </Tabs>
-            {isMd && preview}
-          </main>
-        </div>
-      </div>
-    </ColorModeProvider>
+        }
+        end={<ColorModeSwitch />}
+      />
+
+      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
+        {/* Left-side editor panel */}
+        <Tabs>
+          <TabList>
+            <Tab>Input</Tab>
+            <Tab>Output</Tab>
+            {!isMd && <Tab>Preview</Tab>}
+          </TabList>
+          <TabPanels>
+            {/* Input tab */}
+            <TabPanel>
+              <CodeEditor value={input} onChange={setInput} language="html" />
+            </TabPanel>
+            {/* Ouput tab */}
+            <TabPanel>
+              {prettifiedComponent && (
+                <CodeEditor
+                  value={prettifiedComponent}
+                  options={{ readOnly: true }}
+                  language="javascript"
+                />
+              )}
+            </TabPanel>
+            {/* Preview tab, only visible on smaller breakpoints */}
+            {!isMd && <TabPanel>{preview}</TabPanel>}
+          </TabPanels>
+        </Tabs>
+        {/* Right-side preview panel, only visible on larger breakpoints */}
+        {isMd && preview}
+      </main>
+    </>
   );
 };
 
