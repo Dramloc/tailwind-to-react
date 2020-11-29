@@ -1,6 +1,4 @@
-// @ts-check
 /** @jsxImportSource @emotion/react */
-// @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
@@ -13,6 +11,7 @@ import { Preview } from "./Preview";
 import { ColorModeSwitch } from "./shared/ColorModeSwitch";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Navbar } from "./shared/Navbar";
+import { SelectOption, Select } from "./shared/Select";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
 import { useMedia } from "./shared/useMedia";
@@ -33,7 +32,7 @@ const usePrettierQuery = (source) => {
 const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
-  const [preset] = useState(
+  const [preset, setPreset] = useState(
     /** @type {import("./codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
   );
 
@@ -71,7 +70,15 @@ const App = () => {
             }}
           />
         }
-        end={<ColorModeSwitch />}
+        end={
+          <>
+            <Select value={preset} onChange={setPreset}>
+              <SelectOption value="clsx">clsx</SelectOption>
+              <SelectOption value="twin.macro">twin.macro</SelectOption>
+            </Select>
+            <ColorModeSwitch />
+          </>
+        }
       />
 
       <main tw="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
