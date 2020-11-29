@@ -2,7 +2,6 @@ import { ClassNames } from "@emotion/react";
 import { Transition as HeadlessUITransition } from "@headlessui/react";
 
 export const Transition = ({ enter, enterFrom, enterTo, leave, leaveFrom, leaveTo, ...props }) => {
-  console.log({ enter, enterFrom, enterTo, leave, leaveFrom, leaveTo });
   return (
     <ClassNames>
       {({ css }) => (
