@@ -1,8 +1,8 @@
 // @ts-check
-import { parseExpression } from "@babel/parser";
 import { types as t } from "@babel/core";
+import { parseExpression } from "@babel/parser";
 import { replaceXDataIdentifier } from "./replaceXData";
-import { addClsxToPath, isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
+import { addStyleToPath, isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
 import { xTransition } from "./xTransition";
 
 /** @type {(message: string) => void} */
@@ -101,9 +101,8 @@ export const xShow = {
       } else {
         // Handle case where there are no x-transition child with the same x-show value
         const expression = parseExpression(`!(${value})`);
-        const className = "hidden";
-        const clsx = t.objectExpression([t.objectProperty(t.stringLiteral(className), expression)]);
-        addClsxToPath(clsx, path, params);
+        const style = t.objectExpression([t.objectProperty(t.stringLiteral("hidden"), expression)]);
+        addStyleToPath(style, path, params);
       }
     }
   },

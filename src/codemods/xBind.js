@@ -1,10 +1,9 @@
 // @ts-check
-import { parseExpression } from "@babel/parser";
 import { types as t } from "@babel/core";
+import { parseExpression } from "@babel/parser";
 import { replaceXDataIdentifier } from "./replaceXData";
-import { addClsxToPath, isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
+import { addStyleToPath, isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
 
-/** @type {(message: string) => void} */
 const warn = (message) => console.warn(`[x-bind] ${message}`);
 
 /**
@@ -35,8 +34,8 @@ export const xBind = {
           path.remove();
           return;
         }
-        const clsx = expression;
-        addClsxToPath(clsx, path, params);
+        const style = expression;
+        addStyleToPath(style, path, params);
       } else {
         path.replaceWith(
           t.jsxAttribute(t.jsxIdentifier(attribute), t.jsxExpressionContainer(expression))

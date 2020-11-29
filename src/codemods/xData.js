@@ -1,6 +1,6 @@
 // @ts-check
-import { parseExpression } from "@babel/parser";
 import { types as t } from "@babel/core";
+import { parseExpression } from "@babel/parser";
 import { upperFirst } from "../shared/upperFirst";
 import { replaceXDataAssignment, replaceXDataIdentifier } from "./replaceXData";
 import { xBind } from "./xBind";
@@ -33,9 +33,10 @@ const warn = (message) => console.warn(`[x-data] ${message}`);
  *   );
  * }
  * ```
- * @type {() => import("@babel/core").PluginObj}
+ * @type {(babel: import("@babel/core"), options?: { preset?: import("./convertComponent").TailwindToReactPreset }) => import("@babel/core").PluginObj}
  */
-export const xData = () => {
+export const xData = (babel, { preset = "clsx" } = {}) => {
+  const options = { preset };
   return {
     visitor: {
       JSXAttribute(path, { mappings = {} }) {
@@ -126,25 +127,19 @@ export const xData = () => {
 
           // For all declared callbacks, replace assignments and identifiers
           callbacks.forEach((callback) => {
-            callback.traverse(replaceXDataAssignment, {
-              caller: "[x-data]",
-              mappings,
-            });
-            callback.traverse(replaceXDataIdentifier, {
-              caller: "[x-data]",
-              mappings,
-            });
+            callback.traverse(replaceXDataAssignment, { mappings });
+            callback.traverse(replaceXDataIdentifier, { mappings });
           });
 
           // Access the JSXElement
           const jsxElement = path.parentPath.parentPath;
           jsxElement.assertJSXElement();
 
-          jsxElement.traverse(xOn, { caller: "[x-on]", mappings });
-          jsxElement.traverse(xShow, { caller: "[x-show]", mappings });
-          jsxElement.traverse(xTransition, { caller: "[x-transition]", mappings });
-          jsxElement.traverse(xBind, { caller: "[x-bind]", mappings });
-          jsxElement.traverse(xText, { caller: "[x-text]", mappings });
+          jsxElement.traverse(xOn, { ...options, mappings });
+          jsxElement.traverse(xShow, { ...options, mappings });
+          jsxElement.traverse(xTransition, { ...options, mappings });
+          jsxElement.traverse(xBind, { ...options, mappings });
+          jsxElement.traverse(xText, { ...options, mappings });
         }
       },
     },

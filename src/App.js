@@ -1,4 +1,6 @@
+// @ts-check
 /** @jsxImportSource @emotion/react */
+// @ts-ignore
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
@@ -16,9 +18,9 @@ import { useDebounce } from "./shared/useDebounce";
 import { useMedia } from "./shared/useMedia";
 import { babelWorker, prettierWorker } from "./workers";
 
-/** @type {(html: string) => import("react-query").QueryResult<string>} */
-const useConvertComponentQuery = (html) => {
-  return useQuery(["convert", html], async () => babelWorker.convert(html));
+/** @type {(options: import("./codemods/convertComponent").ConvertComponentOptions) => import("react-query").QueryResult<string>} */
+const useConvertComponentQuery = (options) => {
+  return useQuery(["convert", options], async () => babelWorker.convert(options));
 };
 
 /** @type {(source: string) => import("react-query").QueryResult<string>} */
@@ -31,11 +33,21 @@ const usePrettierQuery = (source) => {
 const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
+  const [preset] = useState(
+    /** @type {import("./codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
+  );
 
-  const { status, data: convertedComponent, error } = useConvertComponentQuery(debouncedInput);
+  const { status, data: convertedComponent, error } = useConvertComponentQuery({
+    html: debouncedInput,
+    preset,
+    name: "Component",
+  });
   const { data: prettifiedComponent } = usePrettierQuery(
     convertedComponent
-      ? `${generateImports(convertedComponent, { type: "esm" })}\n\nexport ${convertedComponent}`
+      ? `${generateImports(convertedComponent, {
+          type: "esm",
+          preset,
+        })}\n\nexport ${convertedComponent}`
       : null
   );
 
@@ -43,7 +55,7 @@ const App = () => {
 
   const preview = (
     <div tw="relative w-full h-full">
-      <Preview code={convertedComponent} isInputLoading={status === "loading"} />
+      <Preview code={convertedComponent} preset={preset} isInputLoading={status === "loading"} />
       <ErrorOverlay origin="Conversion" error={error} />
     </div>
   );

@@ -1,36 +1,39 @@
 import { transformAsync } from "@babel/core";
 import babelPresetReact from "@babel/preset-react";
+import macrosPlugin from "../codemods/babelPluginMacros";
 import { convertComponent } from "../codemods/convertComponent";
 import { generateImports } from "../codemods/generateImports";
+import twinMacro from "../codemods/twinMacro";
 
-export const convert = async (html) => {
-  const { code } = await convertComponent({ name: "Component", html });
+const tailwindConfig = {};
+
+/** @type {(options: import("../codemods/convertComponent").ConvertComponentOptions) => Promise<string>} */
+export const convert = async (options) => {
+  const { code } = await convertComponent(options);
   return code;
 };
 
-export const generatePreview = async (componentCode) => {
+export const generatePreview = async (componentCode, preset) => {
   const template = `
-(() => {
-  ${generateImports(componentCode, { type: "umd" })}
-  const { hydrate, render } = ReactDOM;
+${generateImports(componentCode, { type: "umd", preset })}
+const { hydrate, render } = ReactDOM;
 
-  ${componentCode}
+${componentCode}
 
-  const App = () => {
-    return (
-      <ReactErrorBoundary.ErrorBoundary fallback={<span>Error while rendering component</span>} onError={(error) => window.postMessage({ type: "PREVIEW_ERROR", payload: error })}>
-        <Component />
-      </ReactErrorBoundary.ErrorBoundary>
-    );
-  };
+const App = () => {
+  return (
+    <ReactErrorBoundary.ErrorBoundary fallback={<span>Error while rendering component</span>} onError={(error) => window.postMessage({ type: "PREVIEW_ERROR", payload: error })}>
+      <Component />
+    </ReactErrorBoundary.ErrorBoundary>
+  );
+};
 
-  const rootElement = document.getElementById("root");
-  if (rootElement.hasChildNodes()) {
-    hydrate(<App />, rootElement);
-  } else {
-    render(<App />, rootElement);
-  }
-})();`;
+const rootElement = document.getElementById("root");
+if (rootElement.hasChildNodes()) {
+  hydrate(<App />, rootElement);
+} else {
+  render(<App />, rootElement);
+}`;
   const { code } = await transformAsync(template, {
     presets: [
       [
@@ -40,6 +43,25 @@ export const generatePreview = async (componentCode) => {
         },
       ],
     ],
+    plugins: [
+      preset === "twin.macro" && [
+        macrosPlugin,
+        {
+          require: (id) => {
+            if (id === "twin.macro") {
+              return twinMacro;
+            }
+            throw new Error(`[babel-plugin-macros] require(${id}) not supported`);
+          },
+          resolvePath: (source) => {
+            return source;
+          },
+          twin: {
+            tailwindConfig,
+          },
+        },
+      ],
+    ].filter(Boolean),
   });
   return code;
 };

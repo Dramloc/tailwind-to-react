@@ -1,7 +1,9 @@
+// @ts-check
 import { transformAsync } from "@babel/core";
 import pluginSyntaxJsx from "@babel/plugin-syntax-jsx";
 import HTMLtoJSX from "htmltojsx";
 import { parse as recastParse, print as recastPrint } from "recast";
+import { classNames } from "./classNames";
 import { removeUnusedJSXAttributes } from "./removeUnusedJSXAttributes";
 import { reorderJSXAttributes } from "./reorderJSXAttributes";
 import { xData } from "./xData";
@@ -23,8 +25,10 @@ export const recastPlugin = () => ({
   },
 });
 
-/** @type {(component: { name: string, html: string }) => Promise<import("@babel/core").BabelFileResult>} */
-export const convertComponent = ({ name, html }) => {
+/** @typedef {{ name: string, html: string, preset: TailwindToReactPreset }} ConvertComponentOptions */
+/** @typedef {("clsx" | "twin.macro")} TailwindToReactPreset */
+/** @type {(options: ConvertComponentOptions) => Promise<import("@babel/core").BabelFileResult>} */
+export const convertComponent = ({ name, html, preset }) => {
   const jsx = new HTMLtoJSX({
     createClass: false,
   })
@@ -49,8 +53,19 @@ return (
     plugins: [
       reorderJSXAttributes,
       removeUnusedJSXAttributes,
+      [
+        classNames,
+        {
+          preset,
+        },
+      ],
       xDescription,
-      xData,
+      [
+        xData,
+        {
+          preset,
+        },
+      ],
       xInit,
       pluginSyntaxJsx,
       recastPlugin,

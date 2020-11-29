@@ -1,7 +1,7 @@
 import { types as t } from "@babel/core";
 import { upperFirst } from "../shared/upperFirst";
 
-const warn = (caller, message) => console.warn(`${caller}[replace-x-data] ${message}`);
+const warn = (message) => console.warn(`[replace-x-data] ${message}`);
 
 /** @type {import("@babel/core").Visitor} */
 export const replaceXDataIdentifier = {
@@ -23,14 +23,14 @@ export const replaceXDataIdentifier = {
 
 /** @type {import("@babel/core").Visitor} */
 export const replaceXDataAssignment = {
-  AssignmentExpression(path, { caller, mappings }) {
+  AssignmentExpression(path, { mappings }) {
     if (t.isIdentifier(path.node.left)) {
       // Apply replacements in expression like `open = true`
       const state = path.node.left.name;
       const setState = `set${upperFirst(state)}`;
       const _setState = mappings[setState];
       if (!_setState) {
-        warn(caller, `State ${state} is not declared.`);
+        warn(`State ${state} is not declared.`);
         path.remove();
         return;
       }
@@ -43,7 +43,7 @@ export const replaceXDataAssignment = {
       const setState = `set${upperFirst(state)}`;
       const _setState = mappings[setState];
       if (!_setState) {
-        warn(caller, `State ${state} is not declared.`);
+        warn(`State ${state} is not declared.`);
         return;
       }
       path.replaceWith(t.expressionStatement(t.callExpression(_setState, [path.node.right])));

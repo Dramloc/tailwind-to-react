@@ -1,8 +1,8 @@
 // @ts-check
-import { parseExpression } from "@babel/parser";
 import { types as t } from "@babel/core";
+import { parseExpression } from "@babel/parser";
 import { replaceXDataIdentifier } from "./replaceXData";
-import { isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
+import { createTwinExpression, isJSXAttributeWithName, isJSXAttributeWithNamespace } from "./utils";
 
 /** @type {(message: string) => void} */
 const warn = (message) => console.warn(`[x-transition] ${message}`);
@@ -18,7 +18,10 @@ const attributeMapping = {
 
 /** @type {import("@babel/core").Visitor} */
 export const xTransition = {
-  JSXOpeningElement(path, /** @type {{ xShow?: string, hasTransitionChild?: boolean }} */ params) {
+  JSXOpeningElement(
+    path,
+    /** @type {{ xShow?: string, hasTransitionChild?: boolean, preset: import("./convertComponent").TailwindToReactPreset }} */ params
+  ) {
     if (path.node.attributes.some(isJSXAttributeWithName("x-data"))) {
       path.stop();
       return;
@@ -101,9 +104,22 @@ export const xTransition = {
         }
         const attributeName = attributeMapping[attribute.node.name.name.name];
         const className = attribute.node.value.value;
-        attribute.replaceWith(
-          t.jsxAttribute(t.jsxIdentifier(attributeName), t.stringLiteral(className))
-        );
+        switch (params.preset) {
+          case "twin.macro":
+            attribute.replaceWith(
+              t.jsxAttribute(
+                t.jsxIdentifier(attributeName),
+                t.jsxExpressionContainer(createTwinExpression(className))
+              )
+            );
+            break;
+          case "clsx":
+          default:
+            attribute.replaceWith(
+              t.jsxAttribute(t.jsxIdentifier(attributeName), t.stringLiteral(className))
+            );
+            break;
+        }
       });
     }
   },

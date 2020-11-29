@@ -6,11 +6,15 @@ import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
 import { babelWorker } from "./workers";
 
-/** @type {(input: string) => import("react-query").QueryResult<string>} */
-const useGeneratePreviewQuery = (input) => {
-  return useQuery(["babel", input], async () => babelWorker.generatePreview(input), {
-    enabled: input,
-  });
+/** @type {(input: string, preset: import("./codemods/convertComponent").TailwindToReactPreset) => import("react-query").QueryResult<string>} */
+const useGeneratePreviewQuery = (input, preset) => {
+  return useQuery(
+    ["babel", input, preset],
+    async () => babelWorker.generatePreview(input, preset),
+    {
+      enabled: input,
+    }
+  );
 };
 
 const template = `<!DOCTYPE html>
@@ -27,8 +31,9 @@ const template = `<!DOCTYPE html>
     <script src="https://unpkg.com/react-dom@17.0.1/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.umd.production.min.js"></script>
     <script src="https://unpkg.com/clsx@1.1.1/dist/clsx.min.js"></script>
+    <script src="https://unpkg.com/@emotion/react@11.1.1/dist/emotion-react.umd.min.js"></script>
     <script src="https://unpkg.com/react-error-boundary@3.0.2/dist/react-error-boundary.umd.min.js"></script>
-    <script>
+    <script type="module">
       // https://github.com/sveltejs/svelte-repl/blob/master/src/Output/srcdoc/index.html
       // https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
       document.body.addEventListener('click', event => {
@@ -50,7 +55,7 @@ const template = `<!DOCTYPE html>
         event.preventDefault();
       });
     </script>
-    <script>
+    <script type="module">
       window.addEventListener("message", ({ data }) => {
         if (data.type === "PREVIEW_CHANGED") {
           let $script = document.getElementById("preview");
@@ -58,8 +63,7 @@ const template = `<!DOCTYPE html>
             $script.remove();
           }
           $script = document.createElement("script");
-          // Allow Safari to dynamically execute script, see https://www.html5rocks.com/en/tutorials/speed/script-loading/
-          $script.async = false;
+          $script.type = "module";
           $script.id = "preview";
           $script.innerHTML = data.payload;
           document.body.appendChild($script);
@@ -70,10 +74,11 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-export const Preview = ({ code, isInputLoading }) => {
+/** @type {React.FC<{ code: string, preset: import("./codemods/convertComponent").TailwindToReactPreset, isInputLoading: boolean }>} */
+export const Preview = ({ code, preset, isInputLoading }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
   const [isReady, setIsReady] = useState(false);
-  const { status, data: previewCode } = useGeneratePreviewQuery(code);
+  const { status, data: previewCode } = useGeneratePreviewQuery(code, preset);
   const [error, setError] = useState(null);
   const isLoading = isInputLoading || status === "idle" || status === "loading" || !isReady;
 
