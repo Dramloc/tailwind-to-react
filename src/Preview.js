@@ -1,7 +1,7 @@
-// @ts-check
-import clsx from "clsx";
+/** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from "react";
 import { useQuery } from "react-query";
+import tw from "twin.macro";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
 import { babelWorker } from "./workers";
@@ -114,21 +114,16 @@ export const Preview = ({ code, isInputLoading }) => {
   return (
     <>
       <iframe
-        className="absolute inset-0 h-full w-full"
+        tw="absolute inset-0 h-full w-full"
         ref={iframeRef}
         title="Preview"
         srcDoc={template}
       />
       <div
-        className={clsx(
-          "absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-900 pointer-events-none transition-opacity duration-300 ease-in-out",
-          {
-            "opacity-0": !isLoading,
-            "opacity-75": isLoading,
-          }
-        )}
+        tw="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-900 pointer-events-none transition-opacity duration-300 ease-in-out"
+        css={isLoading ? tw`opacity-75` : tw`opacity-0`}
       >
-        <Spinner className="mt-10">Loading preview</Spinner>
+        <Spinner tw="mt-10">Loading preview</Spinner>
       </div>
       <ErrorOverlay origin="Runtime" error={error} />
     </>

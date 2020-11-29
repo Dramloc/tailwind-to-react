@@ -1,9 +1,9 @@
-// @ts-check
-// @ts-ignore
+/** @jsxImportSource @emotion/react */
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
 import { useQuery } from "react-query";
+import "twin.macro";
 import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
 import { ExampleDropdown } from "./examples/ExampleDropdown";
@@ -42,7 +42,7 @@ const App = () => {
   const isMd = useMedia(["(min-width: 768px)"], [true], false);
 
   const preview = (
-    <div className="relative w-full h-full">
+    <div tw="relative w-full h-full">
       <Preview code={convertedComponent} isInputLoading={status === "loading"} />
       <ErrorOverlay origin="Conversion" error={error} />
     </div>
@@ -62,7 +62,7 @@ const App = () => {
         end={<ColorModeSwitch />}
       />
 
-      <main className="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
+      <main tw="flex-1 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 dark:border-gray-800">
         {/* Left-side editor panel */}
         <Tabs>
           <TabList>

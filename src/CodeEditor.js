@@ -1,4 +1,3 @@
-// @ts-check
 import Editor from "@monaco-editor/react";
 import { useColorMode } from "./shared/ColorModeProvider";
 import { Spinner } from "./shared/Spinner";
