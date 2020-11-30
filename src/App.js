@@ -11,9 +11,10 @@ import { Preview } from "./Preview";
 import { ColorModeSwitch } from "./shared/ColorModeSwitch";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Navbar } from "./shared/Navbar";
-import { SelectOption, Select } from "./shared/Select";
+import { Select, SelectOption } from "./shared/Select";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
+import { useLocalStorage } from "./shared/useLocalStorage";
 import { useMedia } from "./shared/useMedia";
 import { babelWorker, prettierWorker } from "./workers";
 
@@ -32,7 +33,8 @@ const usePrettierQuery = (source) => {
 const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
-  const [preset, setPreset] = useState(
+  const [preset, setPreset] = useLocalStorage(
+    "preset",
     /** @type {import("./codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
   );
 
