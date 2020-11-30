@@ -1,4 +1,4 @@
-// Adapted from https://unpkg.com/twin.macro@2.0.3/macro.js
+// Adapted from https://unpkg.com/twin.macro@2.0.4/macro.js
 /* eslint-disable no-use-before-define, no-sequences */
 
 import { parseExpression } from "@babel/parser";
@@ -645,8 +645,7 @@ var dynamicStyles = {
    */
   // https://tailwindcss.com/docs/box-shadow
   shadow: {
-    prop: "boxShadow",
-    config: "boxShadow",
+    plugin: "boxShadow",
   },
   // https://tailwindcss.com/docs/opacity
   opacity: {
@@ -658,7 +657,7 @@ var dynamicStyles = {
    * ===========================================
    * Transitions
    */
-  // https://tailwindcss.com/docs/transition-property
+  // https://tailwindcss.com/docs/transtiion-property
   transition: {
     plugin: "transition",
   },
@@ -3459,7 +3458,43 @@ var globalKeyframeStyles = function (ref) {
     .join("");
 };
 
-var globalStyles = [globalKeyframeStyles, globalRingStyles];
+var globalBoxShadowStyles = function () {
+  return "* {\n  --tw-shadow': '0 0 #0000; }\n";
+};
+var boxShadow = function (properties) {
+  var theme = properties.theme;
+  var match = properties.match;
+  var getConfigValue = properties.getConfigValue;
+  var errorSuggestions = properties.errors.errorSuggestions;
+  var important = properties.pieces.important;
+  var classValue = match(/(?<=(shadow)-)([^]*)/);
+
+  var configValue = function (config) {
+    return getConfigValue(theme(config), classValue);
+  };
+
+  var value = configValue("boxShadow");
+
+  if (!value) {
+    return errorSuggestions({
+      config: "boxShadow",
+    });
+  }
+
+  return {
+    "--tw-shadow": value === "none" ? "0 0 #0000" : value,
+    boxShadow:
+      "" +
+      [
+        "var(--tw-ring-offset-shadow, 0 0 #0000)",
+        "var(--tw-ring-shadow, 0 0 #0000)",
+        "var(--tw-shadow)",
+      ].join(", ") +
+      important,
+  };
+};
+
+var globalStyles = [globalKeyframeStyles, globalRingStyles, globalBoxShadowStyles];
 
 var getGlobalConfig = function (config) {
   var usedConfig = (config.global && config) || userPresets[config.preset] || userPresets.emotion;
@@ -5320,6 +5355,7 @@ var plugins = {
   animation: animation,
   bg: bg,
   border: border,
+  boxShadow: boxShadow,
   container: container,
   divide: divide,
   gradient: gradient,
