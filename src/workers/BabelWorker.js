@@ -15,16 +15,17 @@ export const convert = async (options) => {
 
 export const generatePreview = async (componentCode, preset) => {
   const template = `
-${generateImports(componentCode, { type: "umd", preset })}
-const { hydrate, render } = ReactDOM;
+${generateImports(componentCode, { type: "cdn", preset })}
+import { hydrate, render } from "https://cdn.skypack.dev/react-dom?min";
+import { ErrorBoundary } from "https://cdn.skypack.dev/react-error-boundary?min";
 
 ${componentCode}
 
 const App = () => {
   return (
-    <ReactErrorBoundary.ErrorBoundary fallback={<span>Error while rendering component</span>} onError={(error) => window.postMessage({ type: "PREVIEW_ERROR", payload: error })}>
+    <ErrorBoundary fallback={<span>Error while rendering component</span>} onError={(error) => window.postMessage({ type: "PREVIEW_ERROR", payload: error })}>
       <Component />
-    </ReactErrorBoundary.ErrorBoundary>
+    </ErrorBoundary>
   );
 };
 

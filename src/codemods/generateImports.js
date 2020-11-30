@@ -79,11 +79,17 @@ const printImportDeclaration = (importDeclaration, type) => {
   return `import ${imports} from "${source}";`;
 };
 
-/** @type {(code: string) => ImportDeclaration | null} */
-const generateReactImportDeclaration = (code) => {
-  const specifiers = ["useEffect", "useMemo", "useRef", "useState"]
-    .map((hook) => (code.includes(hook) ? namedImportSpecifier(hook) : null))
-    .filter(Boolean);
+/** @type {(code: string, type: BundleType, preset: import("./convertComponent").TailwindToReactPreset) => ImportDeclaration | null} */
+const generateReactImportDeclaration = (code, type, preset) => {
+  const specifiers = [
+    // classic runtime requires @jsxFrag pragma
+    type !== "esm" && namedImportSpecifier("Fragment"),
+    // classic runtime requires @jsx pragma
+    type !== "esm" && preset === "clsx" && defaultImportSpecifier("React"),
+    ...["useEffect", "useMemo", "useRef", "useState"].map((hook) =>
+      code.includes(hook) ? namedImportSpecifier(hook) : null
+    ),
+  ].filter(Boolean);
   return specifiers.length !== 0
     ? {
         source: "react",
@@ -174,6 +180,7 @@ Transition.Child = ({
 /** @type {(code: string, type: BundleType) => ImportDeclaration | null} */
 const generateEmotionImportDeclaration = (code, type) => {
   const specifiers = [
+    // classic runtime requires a @jsx pragma
     type !== "esm" ? namedImportSpecifier("jsx") : null,
     code.includes("<Transition") ? namedImportSpecifier("ClassNames") : null,
   ].filter(Boolean);
@@ -187,7 +194,7 @@ const generateEmotionImportDeclaration = (code, type) => {
 
 /** @type {(code: string) => ImportDeclaration | null} */
 const generateClsxImportDeclaration = (code) => {
-  const specifiers = [code.includes("clsx") ? defaultImportSpecifier("clsx") : null].filter(
+  const specifiers = [code.includes("clsx(") ? defaultImportSpecifier("clsx") : null].filter(
     Boolean
   );
   return specifiers.length !== 0
@@ -206,14 +213,17 @@ const getJSXAnnotation = (type, preset) => {
   if (type === "esm") {
     return "/** @jsxImportSource @emotion/react */";
   }
-  return "/** @jsx jsx */";
+  // FIXME: Using @jsxImportSource would simplify this part but react/jsx-runtime
+  // does not export named exports as expected by @emotion/react/jsx-runtime
+  return `/** @jsx jsx */
+/** @jsxFrag Fragment */`;
 };
 
 /** @type {(code: string, options?: Partial<GenerateImportsOptions>) => string} */
 export const generateImports = (code, { type = "esm", preset = "clsx" } = {}) => {
   const jsxAnnotation = getJSXAnnotation(type, preset);
   const importDeclarations = [
-    generateReactImportDeclaration(code),
+    generateReactImportDeclaration(code, type, preset),
     generateHeadlessUIImportDeclaration(code, preset),
     preset === "clsx" && generateClsxImportDeclaration(code),
     preset === "twin.macro" && generateTwinMacroImportDeclaration(code),

@@ -27,12 +27,6 @@ const template = `<!DOCTYPE html>
   </head>
   <body>
     <div id="root"></div>
-    <script src="https://unpkg.com/react@17.0.1/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@17.0.1/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@headlessui/react@0.2.0/dist/headlessui.umd.production.min.js"></script>
-    <script src="https://unpkg.com/clsx@1.1.1/dist/clsx.min.js"></script>
-    <script src="https://unpkg.com/@emotion/react@11.1.1/dist/emotion-react.umd.min.js"></script>
-    <script src="https://unpkg.com/react-error-boundary@3.0.2/dist/react-error-boundary.umd.min.js"></script>
     <script type="module">
       // https://github.com/sveltejs/svelte-repl/blob/master/src/Output/srcdoc/index.html
       // https://github.com/sveltejs/svelte-repl/blob/master/LICENSE
