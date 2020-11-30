@@ -9,7 +9,7 @@ import { babelWorker } from "./workers";
 /** @type {(input: string, preset: import("./codemods/convertComponent").TailwindToReactPreset) => import("react-query").QueryResult<string>} */
 const useGeneratePreviewQuery = (input, preset) => {
   return useQuery(
-    ["babel", input, preset],
+    ["preview", input, preset],
     async () => babelWorker.generatePreview(input, preset),
     {
       enabled: input,
@@ -78,8 +78,8 @@ const template = `<!DOCTYPE html>
 export const Preview = ({ code, preset, isInputLoading }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
   const [isReady, setIsReady] = useState(false);
-  const { status, data: previewCode } = useGeneratePreviewQuery(code, preset);
-  const [error, setError] = useState(null);
+  const { status, data: previewCode, error } = useGeneratePreviewQuery(code, preset);
+  const [runtimeError, setRuntimeError] = useState(null);
   const isLoading = isInputLoading || status === "idle" || status === "loading" || !isReady;
 
   useEffect(() => {
@@ -92,7 +92,7 @@ export const Preview = ({ code, preset, isInputLoading }) => {
       return;
     }
     if (!isLoading) {
-      setError(null);
+      setRuntimeError(null);
       $iframeContentWindow.postMessage(
         {
           type: "PREVIEW_CHANGED",
@@ -107,7 +107,7 @@ export const Preview = ({ code, preset, isInputLoading }) => {
         setIsReady(true);
       }
       if (data.type === "PREVIEW_ERROR") {
-        setError(data.payload);
+        setRuntimeError(data.payload);
       }
     };
     $iframeContentWindow.addEventListener("message", listener);
@@ -130,7 +130,8 @@ export const Preview = ({ code, preset, isInputLoading }) => {
       >
         <Spinner tw="mt-10">Loading preview</Spinner>
       </div>
-      <ErrorOverlay origin="Runtime" error={error} />
+      <ErrorOverlay origin="Preview" error={error} />
+      <ErrorOverlay origin="Runtime" error={runtimeError} />
     </>
   );
 };
