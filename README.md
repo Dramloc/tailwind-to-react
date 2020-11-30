@@ -3,12 +3,16 @@
 Tailwind + Alpine 🔀 React: turn your [tailwind](https://tailwindcss.com/) and [alpine](https://github.com/alpinejs/alpine) markup into React components!
 
 Use the Input panel to develop your component and retrieve the generated React code in the Output panel.
+You can use one of the following preset to change the output:
+
+- `clsx`: Use CSS classnames and [`clsx`](https://www.npmjs.com/package/clsx) for component generation
+- `twin.macro`: Use [`twin.macro`](https://www.npmjs.com/package/twin.macro) and [`emotion`](https://emotion.sh/) for component generation
 
 All the examples are inspired by the preview components of Tailwind UI: https://tailwindui.com/preview. You should be able to use this tool to convert _most_ of Tailwind UI components.
 
 For now, the tailwind config can not be customized (but might be in the future!). If you want more control over it, you can use https://play.tailwindcss.com/ (a big inspiration for this tool).
 
-## Supported features
+## Supported Alpine features
 
 You can use the following Alpine JS directives to create dynamic state:
 
@@ -84,5 +88,5 @@ You can use the following Alpine JS directives to create dynamic state:
 
 ## Upcoming features
 
-- [] Support for custom tailwind config
-- [] Reduce babel worker payload size
+- [ ] Support for custom tailwind config
+- [ ] Reduce babel worker payload size
