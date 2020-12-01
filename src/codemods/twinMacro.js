@@ -79,7 +79,7 @@ function transformThemeValue(themeSection) {
   };
 }
 
-var getTheme = function (configTheme) {
+export const getTheme = function (configTheme) {
   return function (grab) {
     if (!grab) {
       return configTheme;
@@ -3494,7 +3494,7 @@ var boxShadow = function (properties) {
   };
 };
 
-var globalStyles = [globalKeyframeStyles, globalRingStyles, globalBoxShadowStyles];
+export const globalStyles = [globalKeyframeStyles, globalRingStyles, globalBoxShadowStyles];
 
 var getGlobalConfig = function (config) {
   var usedConfig = (config.global && config) || userPresets[config.preset] || userPresets.emotion;

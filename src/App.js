@@ -30,9 +30,26 @@ const usePrettierQuery = (source) => {
   });
 };
 
+const defaultTailwindConfig = `const { default: defaultTheme } = await import("https://cdn.skypack.dev/tailwindcss/defaultTheme?min");
+
+return {
+  darkMode: false,
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["Inter var", ...defaultTheme.fontFamily.sans],
+      },
+    },
+  },
+  variants: {},
+  plugins: [],
+};
+`;
+
 const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
+  const [tailwindConfig, setTailwindConfig] = useState(defaultTailwindConfig);
   const [preset, setPreset] = useLocalStorage(
     "preset",
     /** @type {import("./codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
@@ -56,7 +73,12 @@ const App = () => {
 
   const preview = (
     <div tw="relative w-full h-full">
-      <Preview code={convertedComponent} preset={preset} isInputLoading={status === "loading"} />
+      <Preview
+        code={convertedComponent}
+        tailwindConfig={tailwindConfig}
+        preset={preset}
+        isInputLoading={status === "loading"}
+      />
       <ErrorOverlay origin="Conversion" error={error} />
     </div>
   );
@@ -88,6 +110,7 @@ const App = () => {
         <Tabs>
           <TabList>
             <Tab>Input</Tab>
+            <Tab>Config</Tab>
             <Tab>Output</Tab>
             {!isMd && <Tab>Preview</Tab>}
           </TabList>
@@ -95,6 +118,14 @@ const App = () => {
             {/* Input tab */}
             <TabPanel>
               <CodeEditor value={input} onChange={setInput} language="html" />
+            </TabPanel>
+            {/* Config tab */}
+            <TabPanel>
+              <CodeEditor
+                value={tailwindConfig}
+                onChange={setTailwindConfig}
+                language="javascript"
+              />
             </TabPanel>
             {/* Ouput tab */}
             <TabPanel>

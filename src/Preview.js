@@ -6,15 +6,11 @@ import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
 import { babelWorker } from "./workers";
 
-/** @type {(input: string, preset: import("./codemods/convertComponent").TailwindToReactPreset) => import("react-query").QueryResult<string>} */
-const useGeneratePreviewQuery = (input, preset) => {
-  return useQuery(
-    ["preview", input, preset],
-    async () => babelWorker.generatePreview(input, preset),
-    {
-      enabled: input,
-    }
-  );
+/** @type {(options: import("./workers/BabelWorker").GeneratePreviewOptions) => import("react-query").QueryResult<import("./workers/BabelWorker").PreviewPayload>} */
+const useGeneratePreviewQuery = (options) => {
+  return useQuery(["preview", options], async () => babelWorker.generatePreview(options), {
+    enabled: options.code,
+  });
 };
 
 const template = `<!DOCTYPE html>
@@ -22,7 +18,7 @@ const template = `<!DOCTYPE html>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://cdn.skypack.dev/tailwindcss/dist/base.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
   </head>
   <body>
@@ -52,15 +48,24 @@ const template = `<!DOCTYPE html>
     <script type="module">
       window.addEventListener("message", ({ data }) => {
         if (data.type === "PREVIEW_CHANGED") {
-          let $script = document.getElementById("preview");
+          let $script = document.getElementById("preview-js");
           if ($script) {
             $script.remove();
           }
           $script = document.createElement("script");
           $script.type = "module";
-          $script.id = "preview";
-          $script.innerHTML = data.payload;
+          $script.id = "preview-js";
+          $script.innerHTML = data.payload.js;
           document.body.appendChild($script);
+
+          let $style = document.getElementById("preview-css");
+          if ($style) {
+            $style.remove();
+          }
+          $style = document.createElement("style");
+          $style.id = "preview-css";
+          $style.innerHTML = data.payload.css;
+          document.body.appendChild($style);
         }
       });
       window.postMessage({ type: "PREVIEW_READY" }, "*");
@@ -69,10 +74,14 @@ const template = `<!DOCTYPE html>
 </html>`;
 
 /** @type {React.FC<{ code: string, preset: import("./codemods/convertComponent").TailwindToReactPreset, isInputLoading: boolean }>} */
-export const Preview = ({ code, preset, isInputLoading }) => {
+export const Preview = ({ code, tailwindConfig, preset, isInputLoading }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
   const [isReady, setIsReady] = useState(false);
-  const { status, data: previewCode, error } = useGeneratePreviewQuery(code, preset);
+  const { status, data: previewPayload, error } = useGeneratePreviewQuery({
+    code,
+    tailwindConfig,
+    preset,
+  });
   const [runtimeError, setRuntimeError] = useState(null);
   const isLoading = isInputLoading || status === "idle" || status === "loading" || !isReady;
 
@@ -90,7 +99,7 @@ export const Preview = ({ code, preset, isInputLoading }) => {
       $iframeContentWindow.postMessage(
         {
           type: "PREVIEW_CHANGED",
-          payload: previewCode,
+          payload: previewPayload,
         },
         "*"
       );
@@ -108,7 +117,7 @@ export const Preview = ({ code, preset, isInputLoading }) => {
     return () => {
       $iframeContentWindow.removeEventListener("message", listener);
     };
-  }, [isLoading, previewCode]);
+  }, [isLoading, previewPayload]);
 
   return (
     <>
