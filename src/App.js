@@ -2,7 +2,6 @@
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!./examples/welcome.html";
 import { useState } from "react";
-import { useQuery } from "react-query";
 import "twin.macro";
 import { CodeEditor } from "./CodeEditor";
 import { generateImports } from "./codemods/generateImports";
@@ -16,28 +15,17 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from "./shared/Tabs";
 import { useDebounce } from "./shared/useDebounce";
 import { useLocalStorage } from "./shared/useLocalStorage";
 import { useMedia } from "./shared/useMedia";
-import { babelWorker, prettierWorker } from "./workers";
+import { useConvertComponentQuery, usePrettierQuery } from "./workers";
 
-/** @type {(options: import("./codemods/convertComponent").ConvertComponentOptions) => import("react-query").QueryResult<string>} */
-const useConvertComponentQuery = (options) => {
-  return useQuery(["convert", options], async () => babelWorker.convert(options));
-};
-
-/** @type {(source: string) => import("react-query").QueryResult<string>} */
-const usePrettierQuery = (source) => {
-  return useQuery(["prettier", source], async () => prettierWorker.format(source), {
-    enabled: source,
-  });
-};
-
-const defaultTailwindConfig = `const { default: defaultTheme } = await import("https://cdn.skypack.dev/tailwindcss/defaultTheme?min");
+const defaultTailwindConfig = `// WIP:
+const { default: colors } = await import("https://cdn.skypack.dev/tailwindcss/colors?min");
 
 return {
   darkMode: false,
   theme: {
     extend: {
-      fontFamily: {
-        sans: ["Inter var", ...defaultTheme.fontFamily.sans],
+      colors: {
+        primary: colors.cyan
       },
     },
   },
@@ -50,6 +38,7 @@ const App = () => {
   const [input, setInput] = useState(example);
   const debouncedInput = useDebounce(input, 500);
   const [tailwindConfig, setTailwindConfig] = useState(defaultTailwindConfig);
+  const debouncedTailwindConfig = useDebounce(tailwindConfig, 500);
   const [preset, setPreset] = useLocalStorage(
     "preset",
     /** @type {import("./codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
@@ -75,9 +64,9 @@ const App = () => {
     <div tw="relative w-full h-full">
       <Preview
         code={convertedComponent}
-        tailwindConfig={tailwindConfig}
+        tailwindConfig={debouncedTailwindConfig}
         preset={preset}
-        isInputLoading={status === "loading"}
+        isConverting={status === "loading"}
       />
       <ErrorOverlay origin="Conversion" error={error} />
     </div>

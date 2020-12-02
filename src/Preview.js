@@ -1,17 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
 import tw from "twin.macro";
 import { ErrorOverlay } from "./shared/ErrorOverlay";
 import { Spinner } from "./shared/Spinner";
-import { babelWorker } from "./workers";
-
-/** @type {(options: import("./workers/BabelWorker").GeneratePreviewOptions) => import("react-query").QueryResult<import("./workers/BabelWorker").PreviewPayload>} */
-const useGeneratePreviewQuery = (options) => {
-  return useQuery(["preview", options], async () => babelWorker.generatePreview(options), {
-    enabled: options.code,
-  });
-};
+import { useCompileConfigQuery, useCompileCSSQuery, useCompileJSQuery } from "./workers";
 
 const template = `<!DOCTYPE html>
 <html>
@@ -45,9 +37,12 @@ const template = `<!DOCTYPE html>
         event.preventDefault();
       });
     </script>
+    <style id="preview-css">
+      body { display: none; }
+    </style>
     <script type="module">
       window.addEventListener("message", ({ data }) => {
-        if (data.type === "PREVIEW_CHANGED") {
+        if (data.type === "PREVIEW_JS_CHANGED") {
           let $script = document.getElementById("preview-js");
           if ($script) {
             $script.remove();
@@ -55,16 +50,17 @@ const template = `<!DOCTYPE html>
           $script = document.createElement("script");
           $script.type = "module";
           $script.id = "preview-js";
-          $script.innerHTML = data.payload.js;
+          $script.innerHTML = data.payload;
           document.body.appendChild($script);
-
+        }
+        if (data.type === "PREVIEW_CSS_CHANGED") {
           let $style = document.getElementById("preview-css");
           if ($style) {
             $style.remove();
           }
           $style = document.createElement("style");
           $style.id = "preview-css";
-          $style.innerHTML = data.payload.css;
+          $style.innerHTML = data.payload || "body { display: none; }";
           document.body.appendChild($style);
         }
       });
@@ -73,38 +69,24 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-/** @type {React.FC<{ code: string, preset: import("./codemods/convertComponent").TailwindToReactPreset, isInputLoading: boolean }>} */
-export const Preview = ({ code, tailwindConfig, preset, isInputLoading }) => {
+/** @type {React.FC<{ code: string, tailwindConfig: string, preset: import("./codemods/convertComponent").TailwindToReactPreset, isConverting: boolean }>} */
+export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
+
+  const configResult = useCompileConfigQuery(tailwindConfig);
+  const jsResult = useCompileJSQuery({ code, tailwindConfig: configResult.data, preset });
+  const cssResult = useCompileCSSQuery({ tailwindConfig: configResult.data, preset });
+
   const [isReady, setIsReady] = useState(false);
-  const { status, data: previewPayload, error } = useGeneratePreviewQuery({
-    code,
-    tailwindConfig,
-    preset,
-  });
   const [runtimeError, setRuntimeError] = useState(null);
-  const isLoading = isInputLoading || status === "idle" || status === "loading" || !isReady;
-
+  const sendAction = (action) => {
+    const $iframe = iframeRef.current?.contentWindow;
+    if (!$iframe) return;
+    $iframe.postMessage(action, "*");
+  };
   useEffect(() => {
-    const $iframe = iframeRef.current;
-    if (!$iframe) {
-      return;
-    }
-    const $iframeContentWindow = $iframe.contentWindow;
-    if (!$iframeContentWindow) {
-      return;
-    }
-    if (!isLoading) {
-      setRuntimeError(null);
-      $iframeContentWindow.postMessage(
-        {
-          type: "PREVIEW_CHANGED",
-          payload: previewPayload,
-        },
-        "*"
-      );
-    }
-
+    const $iframe = iframeRef.current?.contentWindow;
+    if (!$iframe) return;
     const listener = ({ data }) => {
       if (data.type === "PREVIEW_READY") {
         setIsReady(true);
@@ -113,11 +95,27 @@ export const Preview = ({ code, tailwindConfig, preset, isInputLoading }) => {
         setRuntimeError(data.payload);
       }
     };
-    $iframeContentWindow.addEventListener("message", listener);
-    return () => {
-      $iframeContentWindow.removeEventListener("message", listener);
-    };
-  }, [isLoading, previewPayload]);
+    $iframe.addEventListener("message", listener);
+    return () => $iframe.removeEventListener("message", listener);
+  }, []);
+
+  useEffect(() => {
+    setRuntimeError(null);
+    sendAction({ type: "PREVIEW_JS_CHANGED", payload: jsResult.data });
+  }, [jsResult.data, isReady]);
+
+  useEffect(() => {
+    sendAction({ type: "PREVIEW_CSS_CHANGED", payload: cssResult.data });
+  }, [cssResult.data, isReady]);
+
+  const isLoading =
+    isConverting ||
+    !isReady ||
+    configResult.status === "loading" ||
+    jsResult.status === "idle" ||
+    jsResult.status === "loading" ||
+    cssResult.status === "idle" ||
+    cssResult.status === "loading";
 
   return (
     <>
@@ -133,7 +131,9 @@ export const Preview = ({ code, tailwindConfig, preset, isInputLoading }) => {
       >
         <Spinner tw="mt-10">Loading preview</Spinner>
       </div>
-      <ErrorOverlay origin="Preview" error={error} />
+      <ErrorOverlay origin="Config" error={configResult.error} />
+      <ErrorOverlay origin="Preview JS" error={jsResult.error} />
+      <ErrorOverlay origin="Preview CSS" error={cssResult.error} />
       <ErrorOverlay origin="Runtime" error={runtimeError} />
     </>
   );
