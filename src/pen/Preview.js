@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from "react";
 import tw from "twin.macro";
-import { ErrorOverlay } from "./shared/ErrorOverlay";
-import { Spinner } from "./shared/Spinner";
-import { useCompileConfigQuery, useCompileCSSQuery, useCompileJSQuery } from "./workers";
+import { ErrorOverlay } from "./ErrorOverlay";
+import { Spinner } from "../shared/Spinner";
+import { useCompileConfigQuery, useCompileCSSQuery, useCompileJSQuery } from "../workers";
 
 const template = `<!DOCTYPE html>
 <html>
@@ -69,7 +69,7 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-/** @type {React.FC<{ code: string, tailwindConfig: string, preset: import("./codemods/convertComponent").TailwindToReactPreset, isConverting: boolean }>} */
+/** @type {React.FC<{ code: string, tailwindConfig: string, preset: import("../codemods/convertComponent").TailwindToReactPreset, isConverting: boolean }>} */
 export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
 

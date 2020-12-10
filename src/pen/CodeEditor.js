@@ -1,6 +1,6 @@
 import Editor from "@monaco-editor/react";
-import { useColorMode } from "./shared/ColorModeProvider";
-import { Spinner } from "./shared/Spinner";
+import { useColorMode } from "../shared/ColorModeProvider";
+import { Spinner } from "../shared/Spinner";
 
 const noop = () => {};
 
