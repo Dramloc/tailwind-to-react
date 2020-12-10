@@ -1,4 +1,4 @@
-// Adapted from https://unpkg.com/twin.macro@2.0.4/macro.js
+// Adapted from https://unpkg.com/twin.macro@2.0.7/macro.js
 /* eslint-disable no-use-before-define, no-sequences */
 
 import { parseExpression } from "@babel/parser";
@@ -1075,14 +1075,14 @@ var staticStyles = {
   "space-x-reverse": {
     output: {
       "> :not([hidden]) ~ :not([hidden])": {
-        "--space-x-reverse": 1,
+        "--tw-space-x-reverse": 1,
       },
     },
   },
   "space-y-reverse": {
     output: {
       "> :not([hidden]) ~ :not([hidden])": {
-        "--space-y-reverse": 1,
+        "--tw-space-y-reverse": 1,
       },
     },
   },
@@ -1091,14 +1091,14 @@ var staticStyles = {
   "divide-x-reverse": {
     output: {
       "> :not([hidden]) ~ :not([hidden])": {
-        "--divide-x-reverse": 1,
+        "--tw-divide-x-reverse": 1,
       },
     },
   },
   "divide-y-reverse": {
     output: {
       "> :not([hidden]) ~ :not([hidden])": {
-        "--divide-y-reverse": 1,
+        "--tw-divide-y-reverse": 1,
       },
     },
   },
@@ -2261,12 +2261,7 @@ var targetTransforms = [
   function (ref) {
     var target = ref.target;
 
-    return target === "default" ? "" : target;
-  },
-  function (ref) {
-    var target = ref.target;
-
-    return target.endsWith("-DEFAULT") ? target.slice(0, -8) : target;
+    return target === "DEFAULT" ? "" : target;
   },
   function (ref) {
     var dynamicKey = ref.dynamicKey;
@@ -3459,7 +3454,7 @@ var globalKeyframeStyles = function (ref) {
 };
 
 var globalBoxShadowStyles = function () {
-  return "* {\n  --tw-shadow': '0 0 #0000; }\n";
+  return "* {\n  --tw-shadow: 0 0 #0000; }\n";
 };
 var boxShadow = function (properties) {
   var theme = properties.theme;
@@ -3604,6 +3599,26 @@ var getGlobalDeclarationProperty = function (ref) {
   return code;
 };
 
+var kebabize = function (string) {
+  return string.replace(/([\da-z]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase();
+};
+
+var convertCssObjectToString = function (cssObject) {
+  if (!cssObject) {
+    return;
+  }
+  return Object.entries(cssObject)
+    .map(function (ref) {
+      var k = ref[0];
+      var v = ref[1];
+
+      return typeof v === "string"
+        ? kebabize(k) + ": " + v + ";"
+        : k + " {\n" + convertCssObjectToString(v) + "\n        }";
+    })
+    .join("\n");
+};
+
 var handleGlobalStylesFunction = function (ref) {
   var references = ref.references;
   var program = ref.program;
@@ -3632,12 +3647,18 @@ var handleGlobalStylesFunction = function (ref) {
 
   var theme = getTheme(state.config.theme); // Provide each global style function with context and convert to a string
 
-  var styles = globalStyles
-    .map(function (globalFunction) {
-      return globalFunction({
-        theme: theme,
-      });
-    })
+  var baseStyles = convertCssObjectToString(state.userPluginData && state.userPluginData.base);
+  var styles = [
+    globalStyles
+      .map(function (globalFunction) {
+        return globalFunction({
+          theme: theme,
+        });
+      })
+      .join("\n"),
+    baseStyles,
+  ]
+    .filter(Boolean)
     .join("\n");
 
   if (state.isStyledComponents) {
@@ -4182,7 +4203,7 @@ var precheckGroup = function (ref) {
     return (
       '\n\n"group" must be added as className:\n\n' +
       logBadGood("tw`group`", '<div className="group">') +
-      "\n"
+      "\n\nRead more at https://twinredirect.page.link/group\n"
     );
   });
 };
@@ -4727,7 +4748,7 @@ var container = function (ref) {
   var paddingStyles = Array.isArray(padding)
     ? getSpacingFromArray(Object.assign({}, { values: padding }, properties("padding")))
     : typeof padding === "object"
-    ? getSpacingStyle("padding", padding, "default")
+    ? getSpacingStyle("padding", padding, "DEFAULT")
     : {
         paddingLeft: padding,
         paddingRight: padding,
@@ -4735,7 +4756,7 @@ var container = function (ref) {
   var marginStyles = Array.isArray(margin)
     ? getSpacingFromArray(Object.assign({}, { values: margin }, properties("margin")))
     : typeof margin === "object"
-    ? getSpacingStyle("margin", margin, "default")
+    ? getSpacingStyle("margin", margin, "DEFAULT")
     : {
         marginLeft: margin,
         marginRight: margin,
@@ -4779,7 +4800,7 @@ var handleOpacity = function (ref) {
   }
   return {
     "> :not([hidden]) ~ :not([hidden])": {
-      "--divide-opacity": "" + opacity,
+      "--tw-divide-opacity": "" + opacity,
     },
   };
 };
@@ -5739,7 +5760,7 @@ var handleTwFunction = function (ref) {
   });
 };
 
-var parseSelector = function (selector) {
+var parseSelector = function (selector, isBase) {
   if (!selector) {
     return;
   }
@@ -5747,7 +5768,10 @@ var parseSelector = function (selector) {
   if (matches === null) {
     return;
   }
-  return matches[0].replace(/\./g, "");
+  if (isBase) {
+    return matches[0];
+  }
+  return matches[0].startsWith(".") ? matches[0].slice(1) : matches[0];
 };
 
 var camelize = function (string) {
@@ -5767,6 +5791,10 @@ var parseRuleProperty = function (string) {
   return camelize(string);
 };
 
+var escapeSelector = function (selector) {
+  return selector.replace(/\\\//g, "/").trim();
+};
+
 var buildAtSelector = function (name, values, screens) {
   // Support @screen selectors
   if (name === "screen") {
@@ -5779,7 +5807,57 @@ var buildAtSelector = function (name, values, screens) {
   return "@" + name + " " + values;
 };
 
-var getUserPluginRules = function (rules, screens) {
+var getBuiltRules = function (rule, isBase) {
+  var obj;
+
+  // Prep comma spaced selectors for parsing
+  var selectorArray = rule.selector.split(","); // Validate each selector
+
+  var selectorParsed = selectorArray
+    .map(function (s) {
+      return parseSelector(s, isBase);
+    })
+    .filter(Boolean); // Join them back into a string
+
+  var selector = selectorParsed.join(","); // Rule isn't formatted correctly
+
+  if (!selector) {
+    return null;
+  }
+
+  if (isBase) {
+    // Base values stay as-is because they aren't interactive
+    return (obj = {}), (obj[escapeSelector(selector)] = buildDeclaration(rule.nodes)), obj;
+  } // Separate comma-separated selectors to allow twin's features
+
+  return selector.split(",").reduce(function (result, selector) {
+    var obj;
+
+    return Object.assign(
+      {},
+      result,
+      ((obj = {}), (obj[escapeSelector(selector)] = buildDeclaration(rule.nodes)), obj)
+    );
+  }, {});
+};
+
+var buildDeclaration = function (items) {
+  if (typeof items !== "object") {
+    return items;
+  }
+  return Object.entries(items).reduce(function (result, ref) {
+    var obj;
+
+    var declaration = ref[1];
+    return Object.assign(
+      {},
+      result,
+      ((obj = {}), (obj[parseRuleProperty(declaration.prop)] = declaration.value), obj)
+    );
+  }, {});
+};
+
+var getUserPluginRules = function (rules, screens, isBase) {
   return rules.reduce(function (result, rule) {
     var obj;
 
@@ -5788,42 +5866,21 @@ var getUserPluginRules = function (rules, screens) {
       // Remove a bunch of nodes that tailwind uses for limiting rule generation
       // https://github.com/tailwindlabs/tailwindcss/commit/b69e46cc1b32608d779dad35121077b48089485d#diff-808341f38c6f7093a7979961a53f5922R20
       if (["layer", "variants", "responsive"].includes(rule.name)) {
-        return deepMerge.apply(void 0, [result].concat(getUserPluginRules(rule.nodes, screens)));
+        return deepMerge.apply(
+          void 0,
+          [result].concat(getUserPluginRules(rule.nodes, screens, isBase))
+        );
       }
 
       var atSelector = buildAtSelector(rule.name, rule.params, screens);
       return deepMerge(
         result,
-        ((obj = {}), (obj[atSelector] = getUserPluginRules(rule.nodes, screens)), obj)
+        ((obj = {}), (obj[atSelector] = getUserPluginRules(rule.nodes, screens, isBase)), obj)
       );
     }
 
-    var selector = parseSelector(rule.selector); // Rule isn't formatted correctly
-
-    if (selector === null) {
-      return null;
-    } // Combine the children styles
-
-    var values = rule.nodes.reduce(function (result, rule) {
-      var obj;
-
-      return Object.assign(
-        {},
-        result,
-        ((obj = {}), (obj[parseRuleProperty(rule.prop)] = rule.value), obj)
-      );
-    }, {}); // Separate comma separated selectors
-
-    var separatedSelectors = selector.split(",").reduce(function (r, item) {
-      var obj;
-
-      return Object.assign(
-        {},
-        r,
-        ((obj = {}), (obj[item.replace(/\\\//g, "/").trim()] = values), obj)
-      );
-    }, {});
-    return deepMerge(result, separatedSelectors);
+    var builtRules = getBuiltRules(rule, isBase);
+    return deepMerge(result, builtRules);
   }, {});
 };
 
@@ -5841,6 +5898,11 @@ var getUserPluginData = function (ref) {
   // No support for Tailwind's addVariant() function
 
   /**
+   * Base
+   */
+
+  var base = getUserPluginRules(processedPlugins.base, config.theme.screens, true);
+  /**
    * Components
    */
 
@@ -5851,6 +5913,7 @@ var getUserPluginData = function (ref) {
 
   var utilities = getUserPluginRules(processedPlugins.utilities, config.theme.screens);
   return {
+    base: base,
     components: components,
     utilities: utilities,
   };
