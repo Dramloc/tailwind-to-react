@@ -5,6 +5,7 @@ import macrosPlugin from "../codemods/babelPluginMacros";
 import { convertComponent as _convertComponent } from "../codemods/convertComponent";
 import { generateImports } from "../codemods/generateImports";
 import twinMacro from "../codemods/twinMacro";
+import { compileConfig } from "./compileConfig";
 
 /** @typedef {(options: import("../codemods/convertComponent").ConvertComponentOptions) => Promise<string>} ConvertComponent */
 /** @type {ConvertComponent} */
@@ -13,7 +14,7 @@ export const convertComponent = async (options) => {
   return code;
 };
 
-/** @typedef {{ code: string, tailwindConfig: object, preset: import("../codemods/convertComponent").TailwindToReactPreset }} CompileJSOptions */
+/** @typedef {{ code: string, tailwindConfig: string, preset: import("../codemods/convertComponent").TailwindToReactPreset }} CompileJSOptions */
 /** @typedef {(options: CompileJSOptions) => Promise<string>} CompileJS */
 /** @type {CompileJS} */
 export const compileJS = async ({ code, tailwindConfig, preset }) => {
@@ -68,7 +69,7 @@ if (rootElement.hasChildNodes()) {
             return source;
           },
           twin: {
-            tailwindConfig,
+            tailwindConfig: await compileConfig(tailwindConfig),
           },
         },
       ],

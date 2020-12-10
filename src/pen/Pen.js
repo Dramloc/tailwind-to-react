@@ -17,8 +17,7 @@ import { CodeEditor } from "./CodeEditor";
 import { ErrorOverlay } from "./ErrorOverlay";
 import { Preview } from "./Preview";
 
-const defaultTailwindConfig = `// WIP:
-const { default: colors } = await import("https://cdn.skypack.dev/tailwindcss/colors?min");
+const defaultTailwindConfig = `const colors = require("tailwindcss/colors");
 
 return {
   darkMode: false,
@@ -30,7 +29,10 @@ return {
     },
   },
   variants: {},
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+  ],
 };
 `;
 

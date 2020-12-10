@@ -1,9 +1,9 @@
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from "react";
 import tw from "twin.macro";
-import { ErrorOverlay } from "./ErrorOverlay";
 import { Spinner } from "../shared/Spinner";
-import { useCompileConfigQuery, useCompileCSSQuery, useCompileJSQuery } from "../workers";
+import { useCompileCSSQuery, useCompileJSQuery } from "../workers";
+import { ErrorOverlay } from "./ErrorOverlay";
 
 const template = `<!DOCTYPE html>
 <html>
@@ -73,9 +73,8 @@ const template = `<!DOCTYPE html>
 export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
 
-  const configResult = useCompileConfigQuery(tailwindConfig);
-  const jsResult = useCompileJSQuery({ code, tailwindConfig: configResult.data, preset });
-  const cssResult = useCompileCSSQuery({ tailwindConfig: configResult.data, preset });
+  const jsResult = useCompileJSQuery({ code, tailwindConfig, preset });
+  const cssResult = useCompileCSSQuery({ tailwindConfig, preset });
 
   const [isReady, setIsReady] = useState(false);
   const [runtimeError, setRuntimeError] = useState(null);
@@ -111,7 +110,6 @@ export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
   const isLoading =
     isConverting ||
     !isReady ||
-    configResult.status === "loading" ||
     jsResult.status === "idle" ||
     jsResult.status === "loading" ||
     cssResult.status === "idle" ||
@@ -131,7 +129,6 @@ export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
       >
         <Spinner tw="mt-10">Loading preview</Spinner>
       </div>
-      <ErrorOverlay origin="Config" error={configResult.error} />
       <ErrorOverlay origin="Preview JS" error={jsResult.error} />
       <ErrorOverlay origin="Preview CSS" error={cssResult.error} />
       <ErrorOverlay origin="Runtime" error={runtimeError} />

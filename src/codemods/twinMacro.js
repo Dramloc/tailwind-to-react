@@ -3603,7 +3603,7 @@ var kebabize = function (string) {
   return string.replace(/([\da-z]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase();
 };
 
-var convertCssObjectToString = function (cssObject) {
+export const convertCssObjectToString = function (cssObject) {
   if (!cssObject) {
     return;
   }
@@ -5884,7 +5884,7 @@ var getUserPluginRules = function (rules, screens, isBase) {
   }, {});
 };
 
-var getUserPluginData = function (ref) {
+export const getUserPluginData = function (ref) {
   var config = ref.config;
 
   if (!config.plugins || config.plugins.length === 0) {

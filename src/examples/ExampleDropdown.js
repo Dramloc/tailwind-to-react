@@ -26,6 +26,14 @@ const examples = [
     name: "Slide-Over",
     load: () => import("raw-loader!./slide-over.html"),
   },
+  {
+    name: "@tailwindcss/forms",
+    load: () => import("raw-loader!./forms.html"),
+  },
+  {
+    name: "@tailwindcss/typography",
+    load: () => import("raw-loader!./typography.html"),
+  },
 ];
 
 /** @type {React.FC<{ onChange: (example: Example) => void }>} */
