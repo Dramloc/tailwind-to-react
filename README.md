@@ -10,8 +10,6 @@ You can use one of the following preset to change the output:
 
 All the examples are inspired by the preview components of Tailwind UI: https://tailwindui.com/preview. You should be able to use this tool to convert _most_ of Tailwind UI components.
 
-For now, the tailwind config can not be customized (but might be in the future!). If you want more control over it, you can use https://play.tailwindcss.com/ (a big inspiration for this tool).
-
 ## Supported Alpine features
 
 You can use the following Alpine JS directives to create dynamic state:
@@ -88,5 +86,4 @@ You can use the following Alpine JS directives to create dynamic state:
 
 ## Upcoming features
 
-- [ ] Support for custom tailwind config
 - [ ] Reduce babel worker payload size
