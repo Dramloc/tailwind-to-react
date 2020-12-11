@@ -3,32 +3,56 @@ import { Menu } from "@headlessui/react";
 import tw from "twin.macro";
 import { Transition } from "../shared/Transition";
 
-/** @typedef {{ name: string, load: () => Promise<{ default: string }> }} Example */
+/** @typedef {{ name: string, load: () => Promise<[{ default: string }, { default: string }]> }} Example */
 /** @type {Example[]} */
 const examples = [
   {
     name: "Welcome",
-    load: () => import("raw-loader!./welcome.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./welcome.html"),
+        import("raw-loader!./defaultTailwindConfig.js"),
+      ]),
   },
   {
     name: "Hero",
-    load: () => import("raw-loader!./hero.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./hero.html"),
+        import("raw-loader!./defaultTailwindConfig.js"),
+      ]),
   },
   {
     name: "Header",
-    load: () => import("raw-loader!./header.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./header.html"),
+        import("raw-loader!./defaultTailwindConfig.js"),
+      ]),
   },
   {
     name: "Stacked Layout",
-    load: () => import("raw-loader!./stacked-layout.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./stacked-layout.html"),
+        import("raw-loader!./defaultTailwindConfig.js"),
+      ]),
   },
   {
     name: "Slide-Over",
-    load: () => import("raw-loader!./slide-over.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./slide-over.html"),
+        import("raw-loader!./defaultTailwindConfig.js"),
+      ]),
   },
   {
     name: "@tailwindcss/forms",
-    load: () => import("raw-loader!./forms.html"),
+    load: () =>
+      Promise.all([
+        import("raw-loader!./forms.html"),
+        import("raw-loader!./tailwindConfigForms.js"),
+      ]),
   },
 ];
 

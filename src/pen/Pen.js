@@ -1,5 +1,7 @@
 /** @jsxImportSource @emotion/react */
 // eslint-disable-next-line import/no-webpack-loader-syntax
+import defaultTailwindConfig from "raw-loader!../examples/defaultTailwindConfig";
+// eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!../examples/welcome.html";
 import { useState } from "react";
 import "twin.macro";
@@ -16,24 +18,6 @@ import { useConvertComponentQuery, usePrettierQuery } from "../workers";
 import { CodeEditor } from "./CodeEditor";
 import { ErrorOverlay } from "./ErrorOverlay";
 import { Preview } from "./Preview";
-
-const defaultTailwindConfig = `const colors = require("tailwindcss/colors");
-
-module.exports = {
-  darkMode: false,
-  theme: {
-    extend: {
-      colors: {
-        primary: colors.cyan
-      },
-    },
-  },
-  variants: {},
-  plugins: [
-    require("@tailwindcss/forms"),
-  ],
-};
-`;
 
 const App = () => {
   const [input, setInput] = useState(example);
@@ -79,8 +63,9 @@ const App = () => {
         start={
           <ExampleDropdown
             onChange={async (example) => {
-              const module = await example.load();
-              setInput(module.default);
+              const [{ default: input }, { default: tailwindConfig }] = await example.load();
+              setInput(input);
+              setTailwindConfig(tailwindConfig);
             }}
           />
         }
