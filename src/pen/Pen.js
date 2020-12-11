@@ -19,7 +19,7 @@ import { Preview } from "./Preview";
 
 const defaultTailwindConfig = `const colors = require("tailwindcss/colors");
 
-return {
+module.exports = {
   darkMode: false,
   theme: {
     extend: {

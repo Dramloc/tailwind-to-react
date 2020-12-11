@@ -2,10 +2,9 @@
 /** @typedef {(rawTailwindConfig: string) => Promise<object>} CompileConfig */
 /** @type {CompileConfig} */
 export const compileConfig = async (rawTailwindConfig) => {
-  const tailwindConfigWithAsyncImports = rawTailwindConfig.replace(
-    /\brequire\(([^(]*)\)/g,
-    (_, id) => `(await require(${id}))`
-  );
+  const tailwindConfigWithAsyncImports = rawTailwindConfig
+    .replace("module.exports =", "return")
+    .replace(/\brequire\(([^(]*)\)/g, (_, id) => `(await require(${id}))`);
 
   // eslint-disable-next-line no-eval
   const tailwindConfig = await eval(`(async () => {
