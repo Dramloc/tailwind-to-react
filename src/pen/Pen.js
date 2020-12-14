@@ -1,12 +1,10 @@
 /** @jsxImportSource @emotion/react */
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import defaultTailwindConfig from "raw-loader!../examples/defaultTailwindConfig";
-// eslint-disable-next-line import/no-webpack-loader-syntax
 import example from "raw-loader!../examples/welcome.html";
 import { useState } from "react";
 import "twin.macro";
 import { generateImports } from "../codemods/generateImports";
-import { ExampleDropdown } from "../examples/ExampleDropdown";
+import { defaultTailwindConfig, ExampleDropdown } from "../examples/ExampleDropdown";
 import { ColorModeSwitch } from "../shared/ColorModeSwitch";
 import { Navbar } from "../shared/Navbar";
 import { Select, SelectOption } from "../shared/Select";

@@ -3,56 +3,64 @@ import { Menu } from "@headlessui/react";
 import tw from "twin.macro";
 import { Transition } from "../shared/Transition";
 
+export const defaultTailwindConfig = `const colors = require("tailwindcss/colors");
+
+module.exports = {
+  darkMode: false,
+  theme: {
+    extend: {
+      colors: {
+        primary: colors.cyan,
+      },
+    },
+  },
+  variants: {},
+  plugins: [],
+};
+`;
+
+const tailwindConfigForms = `const colors = require("tailwindcss/colors");
+
+module.exports = {
+  darkMode: false,
+  theme: {
+    extend: {
+      colors: {
+        primary: colors.cyan,
+      },
+    },
+  },
+  variants: {},
+  plugins: [require("@tailwindcss/forms")],
+};
+`;
+
 /** @typedef {{ name: string, load: () => Promise<[{ default: string }, { default: string }]> }} Example */
 /** @type {Example[]} */
 const examples = [
   {
     name: "Welcome",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./welcome.html"),
-        import("raw-loader!./defaultTailwindConfig.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./welcome.html"), defaultTailwindConfig]),
   },
   {
     name: "Hero",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./hero.html"),
-        import("raw-loader!./defaultTailwindConfig.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./hero.html"), defaultTailwindConfig]),
   },
   {
     name: "Header",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./header.html"),
-        import("raw-loader!./defaultTailwindConfig.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./header.html"), defaultTailwindConfig]),
   },
   {
     name: "Stacked Layout",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./stacked-layout.html"),
-        import("raw-loader!./defaultTailwindConfig.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./stacked-layout.html"), defaultTailwindConfig]),
   },
   {
     name: "Slide-Over",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./slide-over.html"),
-        import("raw-loader!./defaultTailwindConfig.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./slide-over.html"), defaultTailwindConfig]),
   },
   {
     name: "@tailwindcss/forms",
-    load: () =>
-      Promise.all([
-        import("raw-loader!./forms.html"),
-        import("raw-loader!./tailwindConfigForms.js"),
-      ]),
+    load: () => Promise.all([import("raw-loader!./forms.html"), tailwindConfigForms]),
   },
 ];
 
