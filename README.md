@@ -83,7 +83,3 @@ You can use the following Alpine JS directives to create dynamic state:
   ```html
   <input x-init="$el.focus()" />
   ```
-
-## Upcoming features
-
-- [ ] Reduce babel worker payload size

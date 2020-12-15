@@ -1,11 +1,18 @@
+/** @jsxImportSource @emotion/react */
 import { Global } from "@emotion/react";
-import { QueryCache, ReactQueryCacheProvider } from "react-query";
+import { lazy, Suspense } from "react";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import tw, { GlobalStyles } from "twin.macro";
-import Pen from "./pen/Pen";
 import { ColorModeProvider } from "./shared/ColorModeProvider";
 
-const queryCache = new QueryCache({
-  defaultConfig: {
+const DashboardPage = lazy(() => import("./dashboard/DashboardPage"));
+const CreatePenPage = lazy(() => import("./pens/CreatePenPage"));
+const PenPage = lazy(() => import("./pens/PenPage"));
+const ExamplePage = lazy(() => import("./examples/ExamplePage"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
     queries: {
       retry: false,
       refetchOnWindowFocus: false,
@@ -15,18 +22,30 @@ const queryCache = new QueryCache({
 
 const App = () => {
   return (
-    <ReactQueryCacheProvider queryCache={queryCache}>
+    <QueryClientProvider client={queryClient}>
       <GlobalStyles />
       <Global
         styles={{
           body: tw`antialiased font-sans`,
-          "#root": tw`h-screen flex flex-col overflow-hidden bg-white text-gray-800 dark:bg-gray-900 dark:text-white`,
+          "#root": tw`min-h-screen bg-gray-100 text-gray-800 dark:(bg-gray-900 text-white)`,
         }}
       />
       <ColorModeProvider>
-        <Pen />
+        <BrowserRouter>
+          <Suspense fallback={null}>
+            <Switch>
+              <Route path="/" exact component={DashboardPage} />
+              <Route path="/pens/new" exact component={CreatePenPage} />
+              <Route path="/pens/:penSlug" exact component={PenPage} />
+              <Route path="/examples/:exampleSlug" exact component={ExamplePage} />
+              <Route path="*">
+                <Redirect to="/" />
+              </Route>
+            </Switch>
+          </Suspense>
+        </BrowserRouter>
       </ColorModeProvider>
-    </ReactQueryCacheProvider>
+    </QueryClientProvider>
   );
 };
 

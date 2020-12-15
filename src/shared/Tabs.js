@@ -23,22 +23,22 @@ export const Tabs = (props) => {
 export const TabList = (props) => {
   return (
     <ReachTabList
-      tw="flex items-center bg-transparent space-x-5 -mt-px flex-none px-5 sm:px-6"
+      css={{
+        "&[data-reach-tab-list]": tw`flex items-center bg-transparent space-x-5 -mt-px flex-none px-5 sm:px-6`,
+      }}
       {...props}
     />
   );
 };
 
 /** @type {typeof ReachTab} */
-export const Tab = ({ isSelected, children, ...props }) => {
+export const Tab = ({ children, ...props }) => {
   return (
     <ReachTab
-      tw="flex text-xs leading-4 font-medium px-0.5 py-0 border-0 border-t-2 border-solid focus:outline-none transition-colors duration-150"
-      css={
-        isSelected
-          ? tw`border-primary-500 text-gray-900 dark:text-white`
-          : tw`border-transparent text-gray-500 hover:text-gray-900 focus:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:focus:text-white`
-      }
+      css={{
+        "&[data-reach-tab]": tw`flex text-xs leading-4 font-medium px-0.5 py-0 border-0 border-t-2 border-solid focus:outline-none transition-colors duration-150 border-transparent text-gray-500 hover:text-gray-900 focus:text-gray-900 dark:text-gray-400 dark:hover:text-white dark:focus:text-white`,
+        "&[data-reach-tab][data-selected]": tw`border-primary-500 text-gray-900 dark:text-white`,
+      }}
       {...props}
     >
       <span tw="py-2.5 border-b-2 border-transparent">{children}</span>

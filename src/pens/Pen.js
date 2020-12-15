@@ -1,11 +1,12 @@
 /** @jsxImportSource @emotion/react */
-// eslint-disable-next-line import/no-webpack-loader-syntax
-import example from "raw-loader!../examples/welcome.html";
-import { useState } from "react";
+import { Global } from "@emotion/react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import "twin.macro";
+import tw from "twin.macro";
 import { generateImports } from "../codemods/generateImports";
-import { defaultTailwindConfig, ExampleDropdown } from "../examples/ExampleDropdown";
 import { ColorModeSwitch } from "../shared/ColorModeSwitch";
+import { ChevronLeftOutlineIcon } from "../shared/Icons";
 import { Navbar } from "../shared/Navbar";
 import { Select, SelectOption } from "../shared/Select";
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "../shared/Tabs";
@@ -15,10 +16,13 @@ import { useMedia } from "../shared/useMedia";
 import { useConvertComponentQuery, usePrettierQuery } from "../workers";
 import { CodeEditor } from "./CodeEditor";
 import { ErrorOverlay } from "./ErrorOverlay";
+import { useUpdatePen } from "./PenQueries";
 import { Preview } from "./Preview";
 
-const App = () => {
-  const [input, setInput] = useState(example);
+export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) => {
+  const [name, setName] = useState(defaultName);
+  const debouncedName = useDebounce(name, 500);
+  const [input, setInput] = useState(defaultInput);
   const debouncedInput = useDebounce(input, 500);
   const [tailwindConfig, setTailwindConfig] = useState(defaultTailwindConfig);
   const debouncedTailwindConfig = useDebounce(tailwindConfig, 500);
@@ -26,6 +30,18 @@ const App = () => {
     "preset",
     /** @type {import("../codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
   );
+
+  const { mutate: updatePen } = useUpdatePen();
+  useEffect(() => {
+    if (slug) {
+      updatePen({
+        slug,
+        name: debouncedName,
+        html: debouncedInput,
+        tailwindConfig: debouncedTailwindConfig,
+      });
+    }
+  }, [debouncedInput, debouncedName, debouncedTailwindConfig, slug, updatePen]);
 
   const { status, data: convertedComponent, error } = useConvertComponentQuery({
     html: debouncedInput,
@@ -57,15 +73,41 @@ const App = () => {
 
   return (
     <>
+      <Global styles={{ "#root": tw`h-screen flex flex-col overflow-hidden` }} />
       <Navbar
+        tw="bg-white dark:(bg-gray-900)"
         start={
-          <ExampleDropdown
-            onChange={async (example) => {
-              const [{ default: input }, { default: tailwindConfig }] = await example.load();
-              setInput(input);
-              setTailwindConfig(tailwindConfig);
-            }}
-          />
+          <div tw="flex items-center space-x-3">
+            <Link
+              to="/"
+              css={[
+                tw`p-2 rounded-md focus:(outline-none ring-2 ring-offset-2)`,
+                tw`bg-gray-100 text-gray-300 hover:bg-gray-200 focus:ring-primary-500 focus:ring-offset-white`,
+                tw`dark:(bg-gray-800 text-gray-500 hover:bg-gray-700 focus:ring-gray-700 focus:ring-offset-gray-900)`,
+              ]}
+            >
+              <span tw="sr-only">Go back to dashboard</span>
+              <ChevronLeftOutlineIcon tw="h-4 w-4 text-gray-500 dark:text-gray-400" />
+            </Link>
+            {defaultName && (
+              <div tw="hidden sm:block">
+                <label tw="sr-only" htmlFor="name">
+                  Pen name
+                </label>
+                <input
+                  id="name"
+                  type="text"
+                  css={[
+                    tw`h-8 text-sm rounded-md border-none focus:ring-2`,
+                    tw`bg-gray-100 focus:ring-primary-500`,
+                    tw`dark:(bg-gray-800 focus:ring-gray-700)`,
+                  ]}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
         }
         end={
           <>
@@ -120,5 +162,3 @@ const App = () => {
     </>
   );
 };
-
-export default App;

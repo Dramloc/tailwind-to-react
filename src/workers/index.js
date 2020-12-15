@@ -15,7 +15,7 @@ export const useConvertComponentQuery = (options) => {
 /** @type {(options: import("./JSWorker").CompileJSOptions) => import("react-query").QueryResult<string>} */
 export const useCompileJSQuery = (options) => {
   return useQuery(["compileJS", options], async () => jsWorker.compileJS(options), {
-    enabled: options.code && options.tailwindConfig,
+    enabled: !!options.code && !!options.tailwindConfig,
   });
 };
 
@@ -25,7 +25,7 @@ const cssWorker = CSSWorker();
 /** @type {(options: import("./CSSWorker").CompileCSSOptions) => import("react-query").QueryResult<string>} */
 export const useCompileCSSQuery = (options) => {
   return useQuery(["compileCSS", options], async () => cssWorker.compileCSS(options), {
-    enabled: options.tailwindConfig,
+    enabled: !!options.tailwindConfig,
   });
 };
 
@@ -35,6 +35,6 @@ const prettierWorker = PrettierWorker();
 /** @type {(source: string) => import("react-query").QueryResult<string>} */
 export const usePrettierQuery = (source) => {
   return useQuery(["prettier", source], async () => prettierWorker.format(source), {
-    enabled: source,
+    enabled: !!source,
   });
 };
