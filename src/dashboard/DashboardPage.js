@@ -25,10 +25,9 @@ const PenListItem = ({ type, pen }) => {
         to={`/${type}/${pen.slug}`}
         className="group"
         css={[
-          tw`block rounded-lg p-4 border`,
+          tw`block rounded-lg p-4 border transition hocus:shadow-lg focus:outline-none`,
           tw`bg-white border-gray-200 hocus:(bg-primary-500 border-transparent)`,
           tw`dark:(bg-gray-800 border-transparent hocus:bg-primary-600)`,
-          tw`hocus:(shadow-lg outline-none)`,
         ]}
       >
         <dl>
@@ -36,7 +35,7 @@ const PenListItem = ({ type, pen }) => {
             <dt tw="sr-only">Name</dt>
             <dd
               css={[
-                tw`leading-6 font-medium`,
+                tw`leading-6 font-medium truncate transition`,
                 tw`text-black group-hocus:text-white`,
                 tw`dark:(text-white)`,
               ]}
@@ -48,7 +47,7 @@ const PenListItem = ({ type, pen }) => {
             <dt tw="sr-only">Slug</dt>
             <dd
               css={[
-                tw`text-sm font-medium truncate`,
+                tw`text-sm font-medium truncate transition`,
                 tw`text-gray-500 group-hocus:text-primary-200`,
                 tw`dark:(text-gray-400 group-hocus:text-primary-300)`,
               ]}
@@ -69,10 +68,9 @@ const CreatePenPlaceholder = () => {
         to="/pens/new"
         className="group"
         css={[
-          tw`flex h-full items-center justify-center rounded-lg p-4 border-2 border-dashed text-sm font-medium`,
+          tw`flex h-full items-center justify-center rounded-lg p-4 border-2 border-dashed text-sm font-medium transition focus:outline-none`,
           tw`text-gray-500 border-gray-300 hocus:bg-gray-200`,
           tw`dark:(text-gray-400 border-gray-700 hocus:bg-gray-800)`,
-          tw`hocus:(outline-none)`,
         ]}
       >
         Create a new pen

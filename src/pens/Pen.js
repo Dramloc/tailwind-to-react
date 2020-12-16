@@ -81,7 +81,7 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
             <Link
               to="/"
               css={[
-                tw`p-2 rounded-md focus:(outline-none ring-2 ring-offset-2)`,
+                tw`p-2 rounded-md transition focus:(outline-none ring-2 ring-offset-2)`,
                 tw`bg-gray-100 text-gray-300 hover:bg-gray-200 focus:ring-primary-500 focus:ring-offset-white`,
                 tw`dark:(bg-gray-800 text-gray-500 hover:bg-gray-700 focus:ring-gray-700 focus:ring-offset-gray-900)`,
               ]}
@@ -98,9 +98,9 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
                   id="name"
                   type="text"
                   css={[
-                    tw`h-8 text-sm rounded-md border-none focus:ring-2`,
-                    tw`bg-gray-100 focus:ring-primary-500`,
-                    tw`dark:(bg-gray-800 focus:ring-gray-700)`,
+                    tw`h-8 text-sm rounded-md transition border-none focus:(outline-none ring-2 ring-offset-2)`,
+                    tw`bg-gray-100 focus:ring-primary-500 focus:ring-offset-white`,
+                    tw`dark:(bg-gray-800 focus:ring-gray-700 focus:ring-offset-gray-900)`,
                   ]}
                   value={name}
                   onChange={(e) => setName(e.target.value)}
