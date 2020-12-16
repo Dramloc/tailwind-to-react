@@ -1,6 +1,7 @@
 /** @jsxImportSource @emotion/react */
 import { Global } from "@emotion/react";
 import { lazy, Suspense } from "react";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { BrowserRouter, Redirect, Route, Switch } from "react-router-dom";
 import tw, { GlobalStyles } from "twin.macro";
@@ -23,28 +24,31 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <GlobalStyles />
-      <Global
-        styles={{
-          body: tw`antialiased font-sans`,
-          "#root": tw`min-h-screen bg-gray-100 text-gray-800 dark:(bg-gray-900 text-white)`,
-        }}
-      />
-      <ColorModeProvider>
-        <BrowserRouter>
-          <Suspense fallback={null}>
-            <Switch>
-              <Route path="/" exact component={DashboardPage} />
-              <Route path="/pens/new" exact component={CreatePenPage} />
-              <Route path="/pens/:penSlug" exact component={PenPage} />
-              <Route path="/examples/:exampleSlug" exact component={ExamplePage} />
-              <Route path="*">
-                <Redirect to="/" />
-              </Route>
-            </Switch>
-          </Suspense>
-        </BrowserRouter>
-      </ColorModeProvider>
+      <HelmetProvider>
+        <Helmet titleTemplate="%s - Tailwind to React" />
+        <GlobalStyles />
+        <Global
+          styles={{
+            body: tw`antialiased font-sans`,
+            "#root": tw`min-h-screen bg-gray-100 text-gray-800 dark:(bg-gray-900 text-white)`,
+          }}
+        />
+        <ColorModeProvider>
+          <BrowserRouter>
+            <Suspense fallback={null}>
+              <Switch>
+                <Route path="/" exact component={DashboardPage} />
+                <Route path="/pens/new" exact component={CreatePenPage} />
+                <Route path="/pens/:penSlug" exact component={PenPage} />
+                <Route path="/examples/:exampleSlug" exact component={ExamplePage} />
+                <Route path="*">
+                  <Redirect to="/" />
+                </Route>
+              </Switch>
+            </Suspense>
+          </BrowserRouter>
+        </ColorModeProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 };

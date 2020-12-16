@@ -1,4 +1,5 @@
 /** @jsxImportSource @emotion/react */
+import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
 import tw, { styled } from "twin.macro";
 import { examples } from "../examples/examples";
@@ -83,6 +84,7 @@ const DashboardPage = () => {
   const { status, data: pens } = usePens();
   return (
     <>
+      <Helmet title="Dashboard" />
       <Navbar end={<ColorModeSwitch />} />
       <main tw="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-12">
         <section>
