@@ -1,3 +1,4 @@
+// @ts-check
 /** @jsxImportSource @emotion/react */
 import { Global } from "@emotion/react";
 import { useEffect, useState } from "react";
@@ -14,12 +15,18 @@ import { useDebounce } from "../shared/useDebounce";
 import { useLocalStorage } from "../shared/useLocalStorage";
 import { useMedia } from "../shared/useMedia";
 import { useConvertComponentQuery, usePrettierQuery } from "../workers";
+import { generateThumbnail } from "../workers/generateThumbnail";
 import { CodeEditor } from "./CodeEditor";
-import { ErrorOverlay } from "./ErrorOverlay";
 import { useUpdatePen } from "./PenQueries";
 import { Preview } from "./Preview";
 
-export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) => {
+export const Pen = ({
+  slug,
+  defaultName,
+  defaultInput,
+  defaultTailwindConfig,
+  defaultThumbnail,
+}) => {
   const [name, setName] = useState(defaultName);
   const debouncedName = useDebounce(name, 500);
   const [input, setInput] = useState(defaultInput);
@@ -30,6 +37,7 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
     "preset",
     /** @type {import("../codemods/convertComponent").TailwindToReactPreset} */ ("clsx")
   );
+  const [thumbnail, setThumbnail] = useState(defaultThumbnail);
 
   const { mutate: updatePen } = useUpdatePen();
   useEffect(() => {
@@ -39,11 +47,12 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
         name: debouncedName,
         html: debouncedInput,
         tailwindConfig: debouncedTailwindConfig,
+        thumbnail,
       });
     }
-  }, [debouncedInput, debouncedName, debouncedTailwindConfig, slug, updatePen]);
+  }, [debouncedInput, debouncedName, debouncedTailwindConfig, slug, thumbnail, updatePen]);
 
-  const { status, data: convertedComponent, error } = useConvertComponentQuery({
+  const { data: convertedComponent } = useConvertComponentQuery({
     html: debouncedInput,
     preset,
     name: "Component",
@@ -60,15 +69,15 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
   const isMd = useMedia(["(min-width: 768px)"], [true], false);
 
   const preview = (
-    <div tw="relative w-full h-full">
-      <Preview
-        code={convertedComponent}
-        tailwindConfig={debouncedTailwindConfig}
-        preset={preset}
-        isConverting={status === "loading"}
-      />
-      <ErrorOverlay origin="Conversion" error={error} />
-    </div>
+    <Preview
+      html={debouncedInput}
+      tailwindConfig={debouncedTailwindConfig}
+      preset={preset}
+      onSuccess={async (iframe) => {
+        const blob = await generateThumbnail(iframe.contentWindow.document.body);
+        setThumbnail(blob);
+      }}
+    />
   );
 
   return (
@@ -111,7 +120,15 @@ export const Pen = ({ slug, defaultName, defaultInput, defaultTailwindConfig }) 
         }
         end={
           <>
-            <Select value={preset} onChange={setPreset}>
+            <Select
+              value={preset}
+              onChange={(e) =>
+                setPreset(
+                  /** @type {import("../codemods/convertComponent").TailwindToReactPreset} */ (e
+                    .target.value)
+                )
+              }
+            >
               <SelectOption value="clsx">clsx</SelectOption>
               <SelectOption value="twin.macro">twin.macro</SelectOption>
             </Select>

@@ -1,8 +1,9 @@
+// @ts-check
 /** @jsxImportSource @emotion/react */
 import { useEffect, useRef, useState } from "react";
 import tw from "twin.macro";
 import { Spinner } from "../shared/Spinner";
-import { useCompileCSSQuery, useCompileJSQuery } from "../workers";
+import { useCompileCSSQuery, useCompileJSQuery, useConvertComponentQuery } from "../workers";
 import { ErrorOverlay } from "./ErrorOverlay";
 
 const template = `<!DOCTYPE html>
@@ -69,20 +70,26 @@ const template = `<!DOCTYPE html>
   </body>
 </html>`;
 
-/** @type {React.FC<{ code: string, tailwindConfig: string, preset: import("../codemods/convertComponent").TailwindToReactPreset, isConverting: boolean }>} */
-export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
+/**
+ * @typedef {{
+ * html: string,
+ * tailwindConfig: string,
+ * preset: import("../codemods/convertComponent").TailwindToReactPreset,
+ * onSuccess: (iframe: HTMLIFrameElement) => void
+ * }} PreviewProps
+ */
+/** @type {React.FC<PreviewProps>} */
+export const Preview = ({ html, tailwindConfig, preset, onSuccess, ...props }) => {
   const iframeRef = useRef(/** @type {HTMLIFrameElement} */ (undefined));
 
-  const jsResult = useCompileJSQuery({ code, tailwindConfig, preset });
+  const conversionResult = useConvertComponentQuery({ html, preset, name: "Component" });
+  const jsResult = useCompileJSQuery({ code: conversionResult.data, tailwindConfig, preset });
   const cssResult = useCompileCSSQuery({ tailwindConfig, preset });
 
   const [isReady, setIsReady] = useState(false);
   const [runtimeError, setRuntimeError] = useState(null);
-  const sendAction = (action) => {
-    const $iframe = iframeRef.current?.contentWindow;
-    if (!$iframe) return;
-    $iframe.postMessage(action, "*");
-  };
+
+  // Listen for events coming from the iframe
   useEffect(() => {
     const $iframe = iframeRef.current?.contentWindow;
     if (!$iframe) return;
@@ -93,10 +100,21 @@ export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
       if (data.type === "PREVIEW_ERROR") {
         setRuntimeError(data.payload);
       }
+      if (data.type === "PREVIEW_SUCCESS") {
+        if (onSuccess) {
+          onSuccess(iframeRef.current);
+        }
+      }
     };
     $iframe.addEventListener("message", listener);
     return () => $iframe.removeEventListener("message", listener);
-  }, []);
+  }, [onSuccess]);
+
+  const sendAction = (action) => {
+    const $iframe = iframeRef.current?.contentWindow;
+    if (!$iframe) return;
+    $iframe.postMessage(action, "*");
+  };
 
   useEffect(() => {
     setRuntimeError(null);
@@ -108,15 +126,16 @@ export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
   }, [cssResult.data, isReady]);
 
   const isLoading =
-    isConverting ||
     !isReady ||
+    conversionResult.status === "idle" ||
+    conversionResult.status === "loading" ||
     jsResult.status === "idle" ||
     jsResult.status === "loading" ||
     cssResult.status === "idle" ||
     cssResult.status === "loading";
 
   return (
-    <>
+    <div tw="relative w-full h-full" {...props}>
       <iframe
         tw="absolute inset-0 h-full w-full"
         ref={iframeRef}
@@ -129,9 +148,10 @@ export const Preview = ({ code, tailwindConfig, preset, isConverting }) => {
       >
         <Spinner tw="mt-10">Loading preview</Spinner>
       </div>
+      <ErrorOverlay origin="Conversion" error={conversionResult.error} />
       <ErrorOverlay origin="Preview JS" error={jsResult.error} />
       <ErrorOverlay origin="Preview CSS" error={cssResult.error} />
       <ErrorOverlay origin="Runtime" error={runtimeError} />
-    </>
+    </div>
   );
 };

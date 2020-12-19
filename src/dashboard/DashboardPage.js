@@ -1,8 +1,9 @@
+// @ts-check
 /** @jsxImportSource @emotion/react */
+import styled from "@emotion/styled";
 import { Helmet } from "react-helmet-async";
 import { Link } from "react-router-dom";
-import tw, { styled } from "twin.macro";
-import { examples } from "../examples/examples";
+import tw from "twin.macro";
 import { usePens } from "../pens/PenQueries";
 import { ColorModeSwitch } from "../shared/ColorModeSwitch";
 import { Navbar } from "../shared/Navbar";
@@ -19,19 +20,23 @@ const PenList = styled("ul")(
   tw`lg:(grid-cols-4)`
 );
 
-const PenListItem = ({ type, pen }) => {
+/** @type {React.FC<{ pen: import("../pens/PenQueries").Pen }>} */
+const PenListItem = ({ pen }) => {
   return (
     <li>
       <Link
-        to={`/${type}/${pen.slug}`}
+        to={`/pens/${pen.slug}`}
         className="group"
         css={[
-          tw`block rounded-lg p-4 border transition hocus:shadow-lg focus:outline-none`,
+          tw`block rounded-md border transition hocus:shadow-lg focus:outline-none`,
           tw`bg-white border-gray-200 hocus:(bg-primary-500 border-transparent)`,
           tw`dark:(bg-gray-800 border-transparent hocus:bg-primary-600)`,
         ]}
       >
-        <dl>
+        <div tw="relative rounded-t-md w-full h-48 overflow-hidden bg-gray-200 dark:bg-gray-900">
+          {pen.thumbnail && <img tw="w-full" src={URL.createObjectURL(pen.thumbnail)} alt="" />}
+        </div>
+        <dl tw="p-4 rounded-b-md">
           <div>
             <dt tw="sr-only">Name</dt>
             <dd
@@ -42,18 +47,6 @@ const PenListItem = ({ type, pen }) => {
               ]}
             >
               {pen.name}
-            </dd>
-          </div>
-          <div>
-            <dt tw="sr-only">Slug</dt>
-            <dd
-              css={[
-                tw`text-sm font-medium truncate transition`,
-                tw`text-gray-500 group-hocus:text-primary-200`,
-                tw`dark:(text-gray-400 group-hocus:text-primary-300)`,
-              ]}
-            >
-              {pen.slug}
             </dd>
           </div>
         </dl>
@@ -69,7 +62,7 @@ const CreatePenPlaceholder = () => {
         to="/pens/new"
         className="group"
         css={[
-          tw`flex h-full items-center justify-center rounded-lg p-4 border-2 border-dashed text-sm font-medium transition focus:outline-none`,
+          tw`flex h-full items-center justify-center rounded-md p-4 border-2 border-dashed text-sm font-medium transition focus:outline-none`,
           tw`text-gray-500 border-gray-300 hocus:bg-gray-200`,
           tw`dark:(text-gray-400 border-gray-700 hocus:bg-gray-800)`,
         ]}
@@ -88,24 +81,12 @@ const DashboardPage = () => {
       <Navbar end={<ColorModeSwitch />} />
       <main tw="w-full max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8 space-y-12">
         <section>
-          <PenListHeading>Examples</PenListHeading>
+          <PenListHeading>Your pens</PenListHeading>
           <PenList>
-            {examples.map((example) => (
-              <PenListItem type="examples" key={example.slug} pen={example} />
-            ))}
+            <CreatePenPlaceholder />
+            {status === "success" && pens.map((pen) => <PenListItem key={pen.slug} pen={pen} />)}
           </PenList>
         </section>
-        {status === "success" && (
-          <section>
-            <PenListHeading>Your pens</PenListHeading>
-            <PenList>
-              <CreatePenPlaceholder />
-              {pens.map((pen) => (
-                <PenListItem type="pens" key={pen.slug} pen={pen} />
-              ))}
-            </PenList>
-          </section>
-        )}
       </main>
     </>
   );

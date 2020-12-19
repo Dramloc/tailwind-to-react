@@ -1,8 +1,12 @@
+// @ts-check
+// @ts-ignore
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import defaultHTML from "raw-loader!./defaultHTML.html";
 import { useEffect } from "react";
 import { Helmet } from "react-helmet-async";
 import { Redirect } from "react-router-dom";
 import { v4 as uuid } from "uuid";
-import { defaultTailwindConfig } from "../examples/examples";
+import { defaultTailwindConfig } from "./defaultTailwindConfig";
 import { useCreatePen } from "./PenQueries";
 
 const CreatePenPage = () => {
@@ -11,7 +15,7 @@ const CreatePenPage = () => {
     createPen({
       slug: uuid(),
       name: "New Pen",
-      html: "",
+      html: defaultHTML,
       tailwindConfig: defaultTailwindConfig,
     });
   }, [createPen]);

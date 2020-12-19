@@ -1,9 +1,11 @@
+// @ts-check
 import { Helmet } from "react-helmet-async";
 import { useParams } from "react-router-dom";
 import { Pen } from "./Pen";
 import { usePen } from "./PenQueries";
 
 const PenPage = () => {
+  // @ts-ignore
   const { penSlug } = useParams();
   const { status, data: pen } = usePen(penSlug);
 
@@ -17,6 +19,7 @@ const PenPage = () => {
             defaultName={pen.name}
             defaultInput={pen.html}
             defaultTailwindConfig={pen.tailwindConfig}
+            defaultThumbnail={pen.thumbnail}
           />
         </>
       )}

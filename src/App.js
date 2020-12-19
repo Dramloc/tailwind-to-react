@@ -10,7 +10,6 @@ import { ColorModeProvider } from "./shared/ColorModeProvider";
 const DashboardPage = lazy(() => import("./dashboard/DashboardPage"));
 const CreatePenPage = lazy(() => import("./pens/CreatePenPage"));
 const PenPage = lazy(() => import("./pens/PenPage"));
-const ExamplePage = lazy(() => import("./examples/ExamplePage"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,7 +39,6 @@ const App = () => {
                 <Route path="/" exact component={DashboardPage} />
                 <Route path="/pens/new" exact component={CreatePenPage} />
                 <Route path="/pens/:penSlug" exact component={PenPage} />
-                <Route path="/examples/:exampleSlug" exact component={ExamplePage} />
                 <Route path="*">
                   <Redirect to="/" />
                 </Route>

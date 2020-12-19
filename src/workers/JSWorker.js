@@ -42,7 +42,10 @@ if (rootElement.hasChildNodes()) {
   hydrate(<App />, rootElement);
 } else {
   render(<App />, rootElement);
-}`;
+}
+
+window.postMessage({ type: "PREVIEW_SUCCESS" })
+`;
 
   // Compile the preview module
   const { code: js } = await transformAsync(template, {
