@@ -74,7 +74,7 @@ const CreatePenPlaceholder = () => {
 };
 
 const DashboardPage = () => {
-  const { status, data: pens } = usePens();
+  const { data: pens } = usePens();
   return (
     <>
       <Helmet title="Dashboard" />
@@ -84,7 +84,7 @@ const DashboardPage = () => {
           <PenListHeading>Your pens</PenListHeading>
           <PenList>
             <CreatePenPlaceholder />
-            {status === "success" && pens.map((pen) => <PenListItem key={pen.slug} pen={pen} />)}
+            {pens && pens.map((pen) => <PenListItem key={pen.slug} pen={pen} />)}
           </PenList>
         </section>
       </main>

@@ -1,22 +1,15 @@
-/** @jsxImportSource @emotion/react */
-import "twin.macro";
+import styled from "@emotion/styled";
+import tw from "twin.macro";
 
-export const Select = ({ label, value, onChange, children }) => {
-  return (
-    <label tw="relative">
-      <span tw="sr-only">{label}</span>
-      <select
-        tw="bg-transparent border-none text-gray-500 dark:text-gray-400 font-medium text-sm focus:outline-none focus:text-gray-900 dark:focus:text-white transition-colors duration-200 focus:ring-0"
-        css={{ textAlignLast: "right" }}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {children}
-      </select>
-    </label>
-  );
-};
+export const Select = styled(
+  "select"
+)(
+  tw`bg-transparent border-none font-medium text-sm focus:(outline-none ring-0) transition-colors duration-200`,
+  tw`text-gray-500 focus:text-gray-900`,
+  tw`dark:(text-gray-400 focus:text-white)`,
+  { textAlignLast: "right" }
+);
 
-export const SelectOption = (props) => {
-  return <option tw="text-gray-900 bg-white dark:text-white dark:bg-gray-900" {...props} />;
-};
+export const SelectOption = styled("option")(
+  tw`text-gray-900 bg-white dark:text-white dark:bg-gray-900`
+);

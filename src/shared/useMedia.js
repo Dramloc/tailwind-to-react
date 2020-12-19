@@ -1,3 +1,4 @@
+// @ts-check
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 /** @type {<T>(queries: string[], values: T[], defaultValue: T) => T} */

@@ -1,6 +1,8 @@
+// @ts-check
 /** @jsxImportSource @emotion/react */
 import "twin.macro";
 
+/** @type {React.FC<{ origin: string, error: Error }>} */
 export const ErrorOverlay = ({ origin, error }) => {
   if (!error) {
     return null;

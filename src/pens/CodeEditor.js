@@ -1,20 +1,21 @@
+// @ts-check
 import Editor from "@monaco-editor/react";
 import { useColorMode } from "../shared/ColorModeProvider";
 import { Spinner } from "../shared/Spinner";
-
-const noop = () => {};
 
 /**
  * Controlled code editor component based on the Monaco editor.
  * @type {React.FC<import("@monaco-editor/react").EditorProps & { onChange?: (value: string) => void }>}
  */
-export const CodeEditor = ({ onChange = noop, options, ...props }) => {
+export const CodeEditor = ({ onChange, options, ...props }) => {
   const { colorMode } = useColorMode();
 
   /** @type {import("@monaco-editor/react").EditorDidMount} */
   const onEditorDidMount = (getEditorValue, editor) => {
     editor.onDidChangeModelContent(() => {
-      onChange(getEditorValue());
+      if (onChange) {
+        onChange(getEditorValue());
+      }
     });
   };
 

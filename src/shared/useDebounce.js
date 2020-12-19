@@ -1,5 +1,7 @@
+// @ts-check
 import { useEffect, useState } from "react";
 
+/** @type {<S> (value: S, delay: number) => S} */
 export const useDebounce = (value, delay) => {
   const [debouncedValue, setDebouncedValue] = useState(value);
 

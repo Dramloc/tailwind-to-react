@@ -2,7 +2,7 @@
 import { openDB } from "idb";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 
-/** @typedef {{ slug: string, name: string, html: string, tailwindConfig: string }} Pen */
+/** @typedef {{ slug: string, name: string, html: string, tailwindConfig: string, thumbnail?: Blob }} Pen */
 /** @typedef {{ pens: { value: Pen, key: string } } & import("idb").DBSchema} DB */
 
 /** @type {Promise<import("idb").IDBPDatabase<DB>>} */
@@ -23,7 +23,7 @@ export const usePens = () => {
   });
 };
 
-/** @type {(penSlug: string) => import("react-query").UseQueryResult<Pen>} */
+/** @type {(penSlug: string) => import("react-query").UseQueryResult<Pen | undefined>} */
 export const usePen = (penSlug) => {
   return useQuery(["pen", penSlug], async () => {
     const db = await dbPromise;

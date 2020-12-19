@@ -1,6 +1,7 @@
+// @ts-check
 import { useState } from "react";
 
-/** @type {<S> (key: string, initialValue: S) => [S, React.Dispatch<React.SetStateAction<S>>} */
+/** @type {<S> (key: string, initialValue: S) => [S, React.Dispatch<React.SetStateAction<S>>]} */
 export const useLocalStorage = (key, initialValue) => {
   // State to store our value
   // Pass initial state function to useState so logic is only executed once
@@ -19,6 +20,7 @@ export const useLocalStorage = (key, initialValue) => {
 
   // Return a wrapped version of useState's setter function that ...
   // ... persists the new value to localStorage.
+  /** @type {React.Dispatch<React.SetStateAction<typeof initialValue>>} */
   const setValue = (value) => {
     try {
       // Allow value to be a function so we have same API as useState
